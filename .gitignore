@@ -1,0 +1,19 @@
+# Java
+*.class
+target/
+build/
+.gradle/
+
+# Go
+/bin/
+*.test
+*.out
+
+# PHP
+vendor/
+composer.lock
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
