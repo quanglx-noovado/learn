@@ -28,6 +28,7 @@ php/       bài học PHP, một file .php chạy trực tiếp
 dsa/       thuật toán & cấu trúc dữ liệu, cài lại bằng nhiều ngôn ngữ
   go/      có test bằng `go test`
   java/    test thủ công trong hàm main
+interview/ checklist ôn phỏng vấn backend (bắt đầu từ interview/README.md)
 ```
 
 Toàn repo là **một Go module** (`go.mod` ở gốc, module `learn`), nên `go test ./...`

@@ -1,0 +1,224 @@
+# manifest dev.java/learn — sinh tự động, xem tools/README.md
+# uu_tien: A=cot loi cao  B=cot loi thuong  C=nang cao  EN=giu tieng Anh  DONE=da dich  HUB=trang muc luc
+uu_tien	folder_dich	so_tu	url	tieu_de
+B	02-oop	2389	https://dev.java/learn/annotations/	Annotations
+DONE	03-collections	5498	https://dev.java/learn/api/collections-framework/arraylist-vs-linkedlist/	Choosing the Right Implementation Between ArrayList and LinkedList
+DONE	03-collections	768	https://dev.java/learn/api/collections-framework/choosing-keys/	Choosing Immutable Types for Your Key
+DONE	03-collections	2279	https://dev.java/learn/api/collections-framework/collection-interface/	Storing Elements in a Collection
+DONE	03-collections	1518	https://dev.java/learn/api/collections-framework/factory-methods/	Creating and Processing Data with the Collections Factory Methods
+DONE	03-collections	1230	https://dev.java/learn/api/collections-framework/intro/	Storing Data Using the Collections Framework
+DONE	03-collections	779	https://dev.java/learn/api/collections-framework/iterating/	Iterating over the Elements of a Collection
+DONE	03-collections	1705	https://dev.java/learn/api/collections-framework/lists/	Extending Collection with List
+DONE	03-collections	2119	https://dev.java/learn/api/collections-framework/maps-and-lambdas/	Handling Map Values with Lambda Expressions
+DONE	03-collections	1623	https://dev.java/learn/api/collections-framework/maps/	Using Maps to Store Key Value Pairs
+DONE	03-collections	1338	https://dev.java/learn/api/collections-framework/organization/	Getting to Know the Collection Hierarchy
+DONE	03-collections	820	https://dev.java/learn/api/collections-framework/sets/	Extending Collection with Set, SortedSet and NavigableSet
+DONE	03-collections	842	https://dev.java/learn/api/collections-framework/sorted-maps/	Keeping Keys Sorted with SortedMap and NavigableMap
+DONE	03-collections	1136	https://dev.java/learn/api/collections-framework/stacks-queues/	Storing Elements in Stacks and Queues
+DONE	03-collections	1540	https://dev.java/learn/api/collections-framework/working-with-keys-and-values/	Managing the Content of a Map
+A	05-streams	1967	https://dev.java/learn/api/streams/characteristics/	Finding the Characteristics of a Stream
+A	05-streams	1137	https://dev.java/learn/api/streams/collector-interface/	Implementing the Collector Interface
+A	05-streams	3370	https://dev.java/learn/api/streams/creating/	Creating Streams
+A	05-streams	2112	https://dev.java/learn/api/streams/custom-collectors/	Creating Your Own Collector
+A	05-streams	7709	https://dev.java/learn/api/streams/gatherers/	The Gatherer API
+A	05-streams	3532	https://dev.java/learn/api/streams/intermediate-operation/	Adding Intermediate Operations on a Stream
+A	05-streams	2750	https://dev.java/learn/api/streams/map-filter-reduce/	Processing Data in Memory Using the Stream API
+A	05-streams	3526	https://dev.java/learn/api/streams/optionals/	Using Optionals
+A	05-streams	3301	https://dev.java/learn/api/streams/parallel-streams/	Parallelizing Streams
+A	05-streams	2695	https://dev.java/learn/api/streams/reducing/	Reducing a Stream
+A	05-streams	3915	https://dev.java/learn/api/streams/terminal-operations/	Adding a Terminal Operation on a Stream
+A	05-streams	4225	https://dev.java/learn/api/streams/using-collectors/	Using a Collector as a Terminal Operation
+A	02-oop	956	https://dev.java/learn/classes-objects/calling-methods-constructors/	Calling Methods and Constructors
+A	02-oop	834	https://dev.java/learn/classes-objects/creating-classes/	Creating Classes
+A	02-oop	1837	https://dev.java/learn/classes-objects/creating-objects/	Creating and Using Objects
+A	02-oop	313	https://dev.java/learn/classes-objects/defining-constructors/	Providing Constructors for your Classes
+A	02-oop	561	https://dev.java/learn/classes-objects/defining-methods/	Defining Methods
+A	02-oop	284	https://dev.java/learn/classes-objects/design-best-practices/	When to Use Nested Classes, Local Classes, Anonymous Classes, and Lambda Expressions
+A	02-oop	832	https://dev.java/learn/classes-objects/enums/	Enums
+A	02-oop	2943	https://dev.java/learn/classes-objects/more-on-classes/	More on Classes
+A	02-oop	2555	https://dev.java/learn/classes-objects/nested-classes/	Nested Classes
+B	12-date-time	165	https://dev.java/learn/date-time/clock/	Clock
+B	12-date-time	333	https://dev.java/learn/date-time/date/	Date
+B	12-date-time	363	https://dev.java/learn/date-time/dayofweek-month/	DayOfWeek and Month Enums
+B	12-date-time	366	https://dev.java/learn/date-time/instant/	Instant
+B	12-date-time	963	https://dev.java/learn/date-time/intro/	The Date Time API Overview
+B	12-date-time	722	https://dev.java/learn/date-time/legacy-code/	Legacy Date-Time Code
+B	12-date-time	288	https://dev.java/learn/date-time/local-time/	Date and Time
+B	12-date-time	293	https://dev.java/learn/date-time/non-iso-conversion/	Non-ISO Date Conversion
+B	12-date-time	466	https://dev.java/learn/date-time/parsing-formatting/	Parsing and Formatting
+B	12-date-time	566	https://dev.java/learn/date-time/period-duration/	Period and Duration
+B	12-date-time	581	https://dev.java/learn/date-time/standard-calendar/	Standard Calendar
+B	12-date-time	1152	https://dev.java/learn/date-time/temporal/	The Temporal Package
+B	12-date-time	751	https://dev.java/learn/date-time/zoneid-zone-offset/	Time Zone and Offset
+EN	ref-ide	1185	https://dev.java/learn/debugging/	Debugging in Java
+EN	ref-ide	1534	https://dev.java/learn/eclipse/	Building a Java Application in the Eclipse IDE
+A	10-exceptions	3252	https://dev.java/learn/exceptions/catching-handling/	Catching and Handling Exceptions
+A	10-exceptions	1742	https://dev.java/learn/exceptions/throwing/	Throwing Exceptions
+A	10-exceptions	1638	https://dev.java/learn/exceptions/unchecked-exception-controversy/	Unchecked Exceptions — The Controversy
+A	10-exceptions	958	https://dev.java/learn/exceptions/what-is-an-exception/	What Is an Exception?
+C	16-ffm	808	https://dev.java/learn/ffm/access-memory/	Access Off-Heap or On-Heap Memory with Memory Segments
+C	16-ffm	662	https://dev.java/learn/ffm/access-structure/	Access Native Data Types
+C	16-ffm	1807	https://dev.java/learn/ffm/jextract/	Generate Java Bindings with Jextract
+C	16-ffm	958	https://dev.java/learn/ffm/native/	Invoke a C Library Function
+C	16-ffm	1445	https://dev.java/learn/ffm/troubleshoot/	Troubleshoot Calls to Native Library Functions
+C	16-ffm	549	https://dev.java/learn/ffm/upcall/	How to Handle a Call from Native Code Back to Java Code
+A	04-generics	2863	https://dev.java/learn/generics/intro/	Introducing Generics
+A	04-generics	881	https://dev.java/learn/generics/restrictions/	Restriction on Generics
+A	04-generics	1610	https://dev.java/learn/generics/type-erasure/	Type Erasure
+A	04-generics	1436	https://dev.java/learn/generics/type-inference/	Type Inference
+A	04-generics	2482	https://dev.java/learn/generics/wildcards/	Wildcards
+A	09-language-basics	3580	https://dev.java/learn/getting-started/	Getting Started with Java
+A	02-oop	938	https://dev.java/learn/inheritance/abstract-classes/	Abstract Methods and Classes
+A	02-oop	1281	https://dev.java/learn/inheritance/objects/	Object as a Superclass
+A	02-oop	861	https://dev.java/learn/inheritance/overriding/	Overriding and Hiding Methods
+A	02-oop	919	https://dev.java/learn/inheritance/polymorphism/	Polymorphism
+A	02-oop	1509	https://dev.java/learn/inheritance/what-is-inheritance/	Inheritance
+EN	ref-ide	3046	https://dev.java/learn/intellij-idea/	Building a Java application in IntelliJ IDEA
+A	02-oop	908	https://dev.java/learn/interfaces/defining-interfaces/	Interfaces
+A	02-oop	2465	https://dev.java/learn/interfaces/examples/	Implementing an Interface
+A	02-oop	226	https://dev.java/learn/interfaces/interfaces-as-a-type/	Using an Interface as a Type
+A	09-language-basics	1484	https://dev.java/learn/introduction/to/java/reflection/	Introduction to Java Reflection
+A	09-language-basics	2874	https://dev.java/learn/introduction/to/method/handles/	Introduction to Method Handles
+EN	ref-misc	1027	https://dev.java/learn/java-cert-overview/	Getting Started with Java Certification
+B	14-java-io	345	https://dev.java/learn/java-io/file-system/creating-reading-directories/	Creating and Reading Directories
+B	14-java-io	1764	https://dev.java/learn/java-io/file-system/file-path/	Accessing Resources using Paths
+B	14-java-io	296	https://dev.java/learn/java-io/file-system/file-system/	Accessing the File System
+B	14-java-io	392	https://dev.java/learn/java-io/file-system/links/	Links, Symbolic and Otherwise
+B	14-java-io	1005	https://dev.java/learn/java-io/file-system/listing/	Listing the Content of a Directory
+B	14-java-io	1642	https://dev.java/learn/java-io/file-system/metadata/	Managing File Attributes
+B	14-java-io	1205	https://dev.java/learn/java-io/file-system/move-copy-delete/	Manipulating Files and Directories
+B	14-java-io	1686	https://dev.java/learn/java-io/file-system/path/	Working with Paths
+B	14-java-io	2745	https://dev.java/learn/java-io/file-system/walking-tree/	Walking the File Tree
+B	14-java-io	2040	https://dev.java/learn/java-io/file-system/watching-dir-changes/	Watching a Directory for Changes
+B	14-java-io	1073	https://dev.java/learn/java-io/intro/	Understanding the Main Java I/O Concepts
+B	14-java-io	1671	https://dev.java/learn/java-io/putting-it-all-together/	Putting it All Together
+B	14-java-io	633	https://dev.java/learn/java-io/reading-writing/binary-files/	Reading and Writing Binary Files
+B	14-java-io	413	https://dev.java/learn/java-io/reading-writing/buffered-text/	Reading and Writing Text Files
+B	14-java-io	759	https://dev.java/learn/java-io/reading-writing/common-operations/	Releasing Resources and Catching Exceptions
+B	14-java-io	1392	https://dev.java/learn/java-io/reading-writing/decorating/	Decorating I/O Streams
+B	14-java-io	546	https://dev.java/learn/java-io/reading-writing/in-memory/	In Memory I/O Streams
+B	14-java-io	1243	https://dev.java/learn/java-io/reading-writing/small-files/	Reading and Writing Small Files
+EN	ref-javafx	1409	https://dev.java/learn/javafx-animations/	Introduction to JavaFX animations
+EN	ref-javafx	1958	https://dev.java/learn/javafx/a11y/example/	Build an Accessible JavaFX Application
+EN	ref-javafx	805	https://dev.java/learn/javafx/a11y/intro/	Introduction to the JavaFX Accessibility API
+EN	ref-javafx	2944	https://dev.java/learn/javafx/core/all/	Putting It All Together
+EN	ref-javafx	1270	https://dev.java/learn/javafx/core/effects/	Effects, Gradients and Animations
+EN	ref-javafx	1226	https://dev.java/learn/javafx/core/fxml/	Using FXML
+EN	ref-javafx	1018	https://dev.java/learn/javafx/core/layout/	JavaFX Layout Controls
+EN	ref-javafx	968	https://dev.java/learn/javafx/core/properties/	JavaFX Properties
+EN	ref-javafx	1467	https://dev.java/learn/javafx/core/structure/	JavaFX Application Basic Structure By Example
+EN	ref-javafx	1033	https://dev.java/learn/javafx/install/	Download and Setup JavaFX
+EN	ref-jvm-tools	1382	https://dev.java/learn/jlink/	Creating Runtime and Application Images with JLink
+EN	ref-jvm-tools	5418	https://dev.java/learn/jshell-tool/	JShell - The Java Shell Tool
+EN	ref-jvm-tools	2088	https://dev.java/learn/jvm/cds-appcds/	CDS and AppCDS in Hotspot
+EN	ref-jvm-tools	1320	https://dev.java/learn/jvm/jfr/configure/	Configuring the JDK Flight Recorder
+EN	ref-jvm-tools	753	https://dev.java/learn/jvm/jfr/getting-started/	Getting Started with the JDK Flight Recorder
+EN	ref-jvm-tools	430	https://dev.java/learn/jvm/jfr/intro/	Introduction to JDK Flight Recorder
+EN	ref-jvm-tools	1465	https://dev.java/learn/jvm/jfr/tools/	The JFR command line tool
+EN	ref-jvm-tools	485	https://dev.java/learn/jvm/tool/garbage-collection/intro/	Introduction to Garbage Collection
+EN	ref-jvm-tools	1176	https://dev.java/learn/jvm/tool/garbage-collection/java-specifics/	Garbage Collection in Java
+EN	ref-jvm-tools	1670	https://dev.java/learn/jvm/tool/garbage-collection/zgc-deepdive/	Deep-dive of ZGC's Architecture
+EN	ref-jvm-tools	926	https://dev.java/learn/jvm/tool/garbage-collection/zgc-overview/	Overview of ZGC
+EN	ref-jvm-tools	2676	https://dev.java/learn/jvm/tool/jpackage/	JPackage
+EN	ref-jvm-tools	665	https://dev.java/learn/jvm/tool/jwebserver/	JWebserver - Launch the Java Simple Web Server
+EN	ref-jvm-tools	6967	https://dev.java/learn/jvm/tool/security/jarsigner/	Jarsigner - Signing Your JARs
+EN	ref-jvm-tools	13184	https://dev.java/learn/jvm/tool/security/keytool/	Keytool - Managing Your Keystore
+EN	ref-jvm-tools	503	https://dev.java/learn/jvm/tool/security/kinit/	Kinit - Obtaining and Granting Kerberos Tickets
+EN	ref-jvm-tools	246	https://dev.java/learn/jvm/tool/security/klist/	Klist - Displaying Your Key Table
+EN	ref-jvm-tools	639	https://dev.java/learn/jvm/tool/security/ktabd/	Ktab - Managing Your Local Key Table
+EN	ref-jvm-tools	3613	https://dev.java/learn/jvm/tool/troubleshooting/jcmd/	Jcmd - Send Diagnostic Commands to a JVM
+EN	ref-jvm-tools	1015	https://dev.java/learn/jvm/tool/troubleshooting/jdb/	Jdb - Fixing Bugs in Java Programs
+EN	ref-jvm-tools	610	https://dev.java/learn/jvm/tool/troubleshooting/jhsdb/	Jhsdb - Analyzing the Core Dump of a Crashed JVM
+EN	ref-jvm-tools	299	https://dev.java/learn/jvm/tool/troubleshooting/jinfo/	Jinfo - Generating Java Configuration Information
+EN	ref-jvm-tools	297	https://dev.java/learn/jvm/tool/troubleshooting/jmap/	Jmap - Printing Details of a Process
+EN	ref-jvm-tools	272	https://dev.java/learn/jvm/tool/troubleshooting/jstack/	Jstack - Printing Java Stack Traces
+EN	ref-jvm-tools	1787	https://dev.java/learn/jvm/tools/complementary/jextract/	Jextract - The Native Library Binding Extraction Tool
+EN	ref-jvm-tools	1169	https://dev.java/learn/jvm/tools/core/jar/	Jar - the Archive Tool
+EN	ref-jvm-tools	22313	https://dev.java/learn/jvm/tools/core/java/	Java - Your Application Launcher
+EN	ref-jvm-tools	5452	https://dev.java/learn/jvm/tools/core/javac/	Javac - the Compiler
+EN	ref-jvm-tools	5159	https://dev.java/learn/jvm/tools/core/javadoc/	Javadoc - the Documentation Generator
+EN	ref-jvm-tools	492	https://dev.java/learn/jvm/tools/core/javap/	Javap - the Disassembler
+EN	ref-jvm-tools	632	https://dev.java/learn/jvm/tools/core/jdeprscan/	Jdeprscan - Deprecated API Elements Scanner
+EN	ref-jvm-tools	1014	https://dev.java/learn/jvm/tools/core/jdeps/	Jdeps - Analyze your Java Classes Dependencies
+EN	ref-jvm-tools	763	https://dev.java/learn/jvm/tools/core/jlink/	Jlink - Assemble and Optimize a Set of Modules
+EN	ref-jvm-tools	929	https://dev.java/learn/jvm/tools/core/jmod/	Jmod - Create JMOD archives
+EN	ref-jvm-tools	1192	https://dev.java/learn/jvm/tools/core/jshell-advanced/	Advanced JShell Usage
+EN	ref-jvm-tools	5417	https://dev.java/learn/jvm/tools/core/jshell/	JShell - The Java Shell Tool
+EN	ref-jvm-tools	278	https://dev.java/learn/jvm/tools/monitoring/jconsole/	Jconsole - the Graphical Monitor of Your Application
+EN	ref-jvm-tools	1457	https://dev.java/learn/jvm/tools/monitoring/jfr/	Jfr - Parse and Print Flight Recorder Files
+EN	ref-jvm-tools	946	https://dev.java/learn/jvm/tools/monitoring/jps/	Jps - Listing your Instrumented JVMs
+EN	ref-jvm-tools	1789	https://dev.java/learn/jvm/tools/monitoring/jstat/	Jstat - Monitoring your JVMs Statistics
+EN	ref-jvm-tools	860	https://dev.java/learn/jvm/tools/monitoring/jstatd/	Jstatd - Monitoring the Creation and Termination of Your JVMs
+A	05-streams	804	https://dev.java/learn/lambdas/combining-chaining-composing/	Combining Lambda Expressions
+A	05-streams	2235	https://dev.java/learn/lambdas/first-lambdas/	Writing Your First Lambda Expression
+A	05-streams	2848	https://dev.java/learn/lambdas/functional-interfaces/	Using Lambdas Expressions in Your Application
+A	05-streams	1065	https://dev.java/learn/lambdas/method-references/	Writing Lambda Expressions as Method References
+A	05-streams	1513	https://dev.java/learn/lambdas/writing-comparators/	Writing and Combining Comparators
+A	09-language-basics	206	https://dev.java/learn/language-basics/all-operators/	Summary of Operators
+A	09-language-basics	1784	https://dev.java/learn/language-basics/arrays/	Creating Arrays in Your Programs
+A	09-language-basics	1540	https://dev.java/learn/language-basics/controlling-flow/	Control Flow Statements
+A	09-language-basics	585	https://dev.java/learn/language-basics/expressions-statements-blocks/	Expressions, Statements and Blocks
+A	09-language-basics	1818	https://dev.java/learn/language-basics/primitive-types/	Creating Primitive Type Variables in Your Programs
+A	09-language-basics	969	https://dev.java/learn/language-basics/switch-expression/	Branching with Switch Expressions
+A	09-language-basics	667	https://dev.java/learn/language-basics/switch-statement/	Branching with Switch Statements
+A	09-language-basics	1376	https://dev.java/learn/language-basics/using-operators/	Using Operators in Your Programs
+A	09-language-basics	315	https://dev.java/learn/language-basics/using-var/	Using the Var Type Identifier
+A	09-language-basics	931	https://dev.java/learn/language-basics/variables/	Creating Variables and Naming Them
+EN	ref-jvm-tools	525	https://dev.java/learn/launch-simple-source-code-programs/	Launching Simple Source-Code Programs
+B	14-java-io	1356	https://dev.java/learn/modernio/	Common I/O Tasks in Modern Java
+C	15-modules	768	https://dev.java/learn/modules/add-exports-opens/	Circumventing Strong Encapsulation with --add-exports and --add-opens
+C	15-modules	630	https://dev.java/learn/modules/add-modules-reads/	Extending the Module Graph with --add-modules and --add-reads
+C	15-modules	1935	https://dev.java/learn/modules/automatic-module/	Incremental Modularization with Automatic Modules
+C	15-modules	657	https://dev.java/learn/modules/building/	Building Modules on the Command Line
+C	15-modules	736	https://dev.java/learn/modules/implied-readability/	Implied Readability with requires transitive
+C	15-modules	3321	https://dev.java/learn/modules/intro/	Introduction to Modules in Java
+C	15-modules	497	https://dev.java/learn/modules/opening-for-reflection/	Reflective Access with Open Modules and Open Packages
+C	15-modules	952	https://dev.java/learn/modules/optional-dependencies/	Optional Dependencies with requires static
+C	15-modules	968	https://dev.java/learn/modules/qualified-exports-opens/	Qualified exports and opens
+C	15-modules	843	https://dev.java/learn/modules/services/	Decoupling Modules with Services
+C	15-modules	1078	https://dev.java/learn/modules/strong-encapsulation/	Strong Encapsulation (of JDK Internals)
+C	15-modules	1560	https://dev.java/learn/modules/unnamed-module/	Code on the Class Path - the Unnamed Module
+A	06-concurrency	2455	https://dev.java/learn/new-features/using-preview/	Using the Preview Features Available in the JDK
+A	06-concurrency	2094	https://dev.java/learn/new-features/virtual-threads/	Virtual Threads
+B	11-numbers-strings	511	https://dev.java/learn/numbers-strings/autoboxing/	Autoboxing and Unboxing
+B	11-numbers-strings	825	https://dev.java/learn/numbers-strings/characters/	Characters
+B	11-numbers-strings	2314	https://dev.java/learn/numbers-strings/numbers/	Numbers
+B	11-numbers-strings	960	https://dev.java/learn/numbers-strings/string-builders/	String Builders
+B	11-numbers-strings	2786	https://dev.java/learn/numbers-strings/strings/	Strings
+A	02-oop	1608	https://dev.java/learn/oop/	Objects, Classes, Interfaces, Packages, and Inheritance
+B	02-oop	2002	https://dev.java/learn/packages/	Packages
+A	02-oop	2296	https://dev.java/learn/pattern-matching/	Using Pattern Matching
+A	02-oop	1976	https://dev.java/learn/records/	Using Records to Model Immutable Data
+B	05-streams	829	https://dev.java/learn/refactoring-to-functional-style/convertingtostreams/	Converting Data Sources to Streams
+B	05-streams	703	https://dev.java/learn/refactoring-to-functional-style/foreachwithif/	Converting foreach with if
+B	05-streams	715	https://dev.java/learn/refactoring-to-functional-style/iteration-with-transformation/	Converting Iteration with Transformation
+B	05-streams	852	https://dev.java/learn/refactoring-to-functional-style/loopswithsteps/	Converting Loops with Steps
+B	05-streams	768	https://dev.java/learn/refactoring-to-functional-style/simpleloops/	Converting Simple Loops
+C	18-reflection	1216	https://dev.java/learn/reflection/annotations/	Reading Annotations
+C	18-reflection	467	https://dev.java/learn/reflection/arrays/	Working with Arrays
+C	18-reflection	2181	https://dev.java/learn/reflection/classes/	Retrieving Classes
+C	18-reflection	1172	https://dev.java/learn/reflection/constructors/	Invoking Constructors
+C	18-reflection	1322	https://dev.java/learn/reflection/dependency-injection/	Creating a Dependency Injection Framework
+C	18-reflection	933	https://dev.java/learn/reflection/enums/	Working with Enumerations
+C	18-reflection	2151	https://dev.java/learn/reflection/fields/	Reading and Writing Fields
+C	18-reflection	1414	https://dev.java/learn/reflection/interceptor/	Creating an Interceptor with Annotations
+C	18-reflection	404	https://dev.java/learn/reflection/intro/	Introducing the Reflection API
+C	18-reflection	2296	https://dev.java/learn/reflection/methods/	Invoking Methods
+C	18-reflection	572	https://dev.java/learn/reflection/modifiers/	Reading Modifiers
+C	18-reflection	1066	https://dev.java/learn/reflection/names/	Reading Class Names
+C	18-reflection	587	https://dev.java/learn/reflection/records/	Working with Records
+B	13-regex	353	https://dev.java/learn/regex/boundary-matchers/	Boundaries
+B	13-regex	622	https://dev.java/learn/regex/character-classes/	Character Classes
+B	13-regex	496	https://dev.java/learn/regex/groups/	Capturing Groups
+B	13-regex	700	https://dev.java/learn/regex/intro/	Introducing Regular Expressions
+B	13-regex	834	https://dev.java/learn/regex/matchers/	The Matcher Class
+B	13-regex	186	https://dev.java/learn/regex/pattern-syntax-exception/	Methods of the PatternSyntaxException Class
+B	13-regex	1217	https://dev.java/learn/regex/patterns/	The Pattern Class
+B	13-regex	340	https://dev.java/learn/regex/predefined-character-classes/	Predefined Character Classes
+B	13-regex	1493	https://dev.java/learn/regex/quantifiers/	Quantifiers
+B	13-regex	400	https://dev.java/learn/regex/string-literals/	String Literals
+C	17-security	1741	https://dev.java/learn/security/app-integrity-tools/	Leveraging JDK Tools and Updates to Help Safeguard Java Applications
+C	17-security	903	https://dev.java/learn/security/digital-signature/	Fundamentals of Digital Signatures and Certificates in Java
+C	17-security	1739	https://dev.java/learn/security/intro/	Introduction to Java Encryption/Decryption
+C	17-security	1629	https://dev.java/learn/security/monitor/	Monitoring Java Application Security with JDK tools and JFR Events
+EN	ref-ide	1421	https://dev.java/learn/vscode-java/	Building a Java application in Visual Studio Code

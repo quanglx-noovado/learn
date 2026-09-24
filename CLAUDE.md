@@ -16,6 +16,13 @@ Repo học tập cá nhân. Bốn nhánh: `java/`, `go/`, `dsa/`, `php/`.
 - Khi cùng một khái niệm tồn tại ở nhiều ngôn ngữ, hãy **đối chiếu**
   (ví dụ: error của Go so với exception của Java/PHP).
 
+## Ghi chú dịch tài liệu
+
+- Bài học dịch từ tài liệu tiếng Anh: bản dịch đặt ở thư mục bài học, bản **gốc tiếng Anh**
+  đặt trong thư mục con `en/` với cùng số thứ tự (ví dụ `java/03-collections/en/`).
+- Đầu mỗi bản dịch ghi `> Dịch từ [tên bài](url)`; đầu mỗi bản gốc ghi `> Source: <url>`.
+- Tải tài liệu dev.java về markdown: `python3 tools/fetch_devjava.py <url> <file.md>`.
+
 ## Quy ước code
 
 - Go: `gofmt` trước khi xong; test theo kiểu table-driven; module gốc là `learn`.
