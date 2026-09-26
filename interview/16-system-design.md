@@ -1,168 +1,321 @@
 # 16. System design
 
-> [← Mục lục](README.md) · Phạm vi: phương pháp làm bài system design 45–60 phút, ước lượng back-of-envelope, building blocks, availability, và các bài kinh điển (URL shortener, rate limiter, feed, chat, đặt vé, thanh toán, flash sale, ID, KV store, crawler, autocomplete, file storage, video, nearby search, leaderboard, job scheduler, metrics/logging).
-> Ký hiệu: 🟢 junior · 🟡 mid · 🔴 senior · ⚠️ cạm bẫy hay bị hỏi vặn. Không nhãn = level nào cũng cần.
+> [← Mục lục](README.md) · Trọng tâm: **phương pháp làm bài 45–60 phút**, ước lượng back-of-envelope (kể cả ước lượng số server PHP-FPM), building blocks, availability, và ý then chốt của các bài kinh điển.
+> Ký hiệu: 🟢 junior · 🟡 mid · 🔴 senior · ⚠️ cạm bẫy hay bị hỏi vặn.
 
-🟡 mid trở lên bắt buộc; junior có thể bị hỏi bản đơn giản (URL shortener, rate limiter, "hệ thống chạy một server, traffic tăng 10 lần").
+File gồm hai phần:
 
-## Bản đồ nhanh
+1. **Lộ trình kiến thức** (phần chính): ba chặng từ nền tới senior. Mỗi module có:
+   - **Vì sao cần học**: module này dùng vào việc gì và hay bị hỏi thế nào.
+   - **Học gì**: các khái niệm, giải thích bằng lời thường kèm ví dụ, và các cạm bẫy ⚠️. Đọc phần
+     này để biết cần học gì, rồi học sâu qua tài liệu ở mục Đọc.
+   - **Đọc**: tài liệu gốc.
+   - **Nắm chắc khi**: tiêu chí tự kiểm tra. Chỉ tick ô khi làm được điều đó mà không cần nhìn
+     tài liệu.
+2. **Câu hỏi thường gặp** (bonus): mỗi câu kèm hướng trả lời mong đợi, gồm ý phải có, điểm
+   cộng senior và red flag. Dùng để kiểm tra sau khi học, không dùng để học thuộc.
 
-**Phương pháp**
-- [ ] Các bước làm bài và phân bổ thời gian
-- [ ] Hỏi functional và non-functional requirement trước khi vẽ
-- [ ] Những gì người chấm đánh giá
-- [ ] ⚠️ Lỗi hay gặp: nhảy vào chi tiết sớm, không hỏi requirement, không nói trade-off, vẽ hộp không giải thích luồng dữ liệu
+Với các bài kinh điển (chặng 2–3), **Học gì** chỉ ghi ý then chốt người chấm tìm; lời giải
+đầy đủ nằm trong nguồn ở mục **Đọc**. Hãy tự làm bài trước rồi mới đọc.
 
-**Ước lượng**
-- [ ] 🟢 Bảng lũy thừa 2 và đơn vị dữ liệu
-- [ ] 🟢 Con số độ trễ nên nhớ
-- [ ] 🟢 QPS từ DAU; 1 triệu request/ngày ≈ 12 QPS; peak factor
-- [ ] 🟡 Ước lượng storage, bandwidth, số máy, bộ nhớ cache
+---
 
-**Building blocks**
-- [ ] 🟢 Scale dọc vs scale ngang; stateless
-- [ ] 🟢 Load balancer (thuật toán, health check, sticky session)
-- [ ] 🟡 API gateway, cache, CDN, object storage
-- [ ] 🟡 SQL vs NoSQL, replication, sharding
-- [ ] 🟡 Queue, search engine, rate limiter
-- [ ] 🔴 ID generator, consistent hashing, bloom filter, geo index
+## Tài liệu nền
 
-**Availability**
-- [ ] 🟢 Bảng số 9 ra downtime/năm
-- [ ] 🟡 SPOF, redundancy, active-passive vs active-active
-- [ ] 🔴 Multi-AZ, multi-region; availability của chuỗi phụ thuộc
+Dùng xuyên suốt file. Các module bên dưới chỉ rõ đọc phần nào.
 
-**Bài kinh điển (viết sâu)**
-- [ ] 🟢 URL shortener
-- [ ] 🟡 Rate limiter
-- [ ] 🟡 Notification system
-- [ ] 🟡 News feed
-- [ ] 🟡 Chat / messenger
-- [ ] 🟡 Đặt vé / đặt phòng (double booking, giữ chỗ tạm)
-- [ ] 🔴 Thanh toán / ví điện tử (ledger, idempotency, reconciliation)
-- [ ] 🔴 Flash sale
+| Tài liệu | Loại | Dùng cho |
+|---|---|---|
+| *System Design Interview*, vol 1 và vol 2 (Alex Xu; vol 2 viết cùng Sahn Lam) | Sách | Phương pháp và gần như mọi bài kinh điển trong file này. Một phần vol 1 đọc được trên [ByteByteGo](https://bytebytego.com/) |
+| [System Design Primer](https://github.com/donnemartin/system-design-primer) | Repo GitHub miễn phí | Building blocks, bảng con số, danh sách bài đọc thêm |
+| [*Designing Data-Intensive Applications*](https://dataintensive.net/) (Kleppmann) | Sách | Lý thuyết phía sau: replication, partitioning, stream. Khi người chấm hỏi "vì sao" |
+| [Google SRE Book](https://sre.google/sre-book/table-of-contents/) | Sách online miễn phí | Availability, SLO, overload, cascading failure |
+| [Amazon Builders' Library](https://aws.amazon.com/builders-library/) | Blog kỹ thuật | Kinh nghiệm vận hành thật: multi-AZ, shuffle sharding, load shedding |
+| Blog kỹ thuật công ty (Discord, Slack, Dropbox, Stripe, Shopify...) | Blog | Bài gốc của từng bài kinh điển, dẫn ở từng module |
 
-**Bài kinh điển (viết gọn)**
-- [ ] 🔴 Distributed ID generator
-- [ ] 🔴 Key-value store
-- [ ] 🔴 Web crawler
-- [ ] 🔴 Search autocomplete
-- [ ] 🔴 File storage (Drive/Dropbox)
-- [ ] 🔴 Video streaming (đại ý)
-- [ ] 🔴 Ride-hailing / nearby search
-- [ ] 🟡 Leaderboard
-- [ ] 🔴 Distributed job scheduler
-- [ ] 🔴 Metrics / logging system
-- [ ] 🟢 "Một server, traffic tăng 10 lần, làm gì?"
+Đọc kèm các file nền: [11-cache.md](11-cache.md), [12-messaging.md](12-messaging.md),
+[14-distributed-systems.md](14-distributed-systems.md), [03-database-sql.md](03-database-sql.md).
 
-## Chi tiết
+---
 
-### Phương pháp làm bài 45–60 phút
+## Lộ trình tổng
 
-- [ ] **Các bước và thời gian** (bài 45 phút; bài 60 phút giãn phần deep dive)
+| Chặng | Module | Mục tiêu | Thời gian gợi ý |
+|---|---|---|---|
+| **1. Nền** 🟢 | 1.1–1.4 | Làm bài đúng quy trình, ước lượng nhanh, biết building block nào dùng khi nào, tính availability | 4–5 ngày |
+| **2. Làm chủ** 🟡 | 2.1–2.7 | Tự làm trọn vẹn 7 bài hay gặp nhất ở mức mid, có deep dive | 8–10 ngày |
+| **3. Senior** 🔴 | 3.1–3.8 | Bài có tiền và tranh chấp (ví, flash sale), hạ tầng (KV store, scheduler, metrics), bài có dữ liệu lớn | 10–12 ngày |
+
+Mỗi bài kinh điển: tự làm 45 phút trên giấy theo quy trình ở 1.1, rồi mới đọc nguồn và so.
+Chỉ đọc lời giải mà không tự làm thì gần như không có tác dụng khi vào phòng phỏng vấn.
+
+---
+
+## Phần 1: Lộ trình kiến thức
+
+### Chặng 1: Nền 🟢
+
+#### 1.1 Phương pháp làm bài 45–60 phút
+
+**Vì sao cần học:** Vòng system design không chấm đáp án đúng, vì đề nào cũng có nhiều đáp án. Người
+chấm chấm **cách bạn đi tới** thiết kế: có hỏi rõ đề không, có ước lượng không, có nói được vì
+sao chọn cái này mà không chọn cái kia không. Không có quy trình thì rất dễ sa vào vẽ hộp 30 phút
+rồi hết giờ mà chưa đi qua được một luồng nào.
+
+**Học gì**
+
+*Bảy bước và thời gian*
+- Bảng dưới cho bài 45 phút. Bài 60 phút thì giãn phần deep dive.
 
   | Bước | Thời gian | Làm gì |
   |---|---|---|
-  | 1. Làm rõ requirement | 5–8 phút | Functional: 3–5 tính năng chính, **chốt phạm vi** (cái gì không làm). Non-functional: quy mô, latency, consistency, availability, đọc/ghi nhiều hơn |
-  | 2. Ước lượng | 3–5 phút | QPS đọc/ghi, peak, storage vài năm, bandwidth. Chỉ tính những con số ảnh hưởng tới thiết kế |
-  | 3. API | 3–5 phút | 3–5 endpoint chính, tham số, response; phân trang, idempotency key nếu có ghi quan trọng |
-  | 4. Data model | 5 phút | Bảng/collection chính, khoá, index, chọn loại DB và vì sao |
-  | 5. Kiến trúc tổng | 10 phút | Sơ đồ hộp, **đi qua luồng đọc và luồng ghi** từ client tới storage |
-  | 6. Deep dive | 10–15 phút | 2–3 điểm then chốt (thường người phỏng vấn chọn): nút thắt, consistency, hot key, failure |
-  | 7. Tổng kết | 2–3 phút | Trade-off đã chọn, điểm yếu còn lại, mở rộng nếu có thêm thời gian |
+  | 1. Requirement | 5–8 phút | Functional 3–5 tính năng, **chốt phạm vi** (cái gì không làm). Non-functional: quy mô, latency, consistency, availability, tỉ lệ đọc/ghi |
+  | 2. Ước lượng | 3–5 phút | QPS đọc/ghi, peak, storage vài năm. Chỉ tính con số ảnh hưởng thiết kế |
+  | 3. API | 3–5 phút | 3–5 endpoint, phân trang, idempotency key cho ghi quan trọng |
+  | 4. Data model | 5 phút | Bảng chính, khoá, index, loại DB và vì sao |
+  | 5. Kiến trúc tổng | 10 phút | Sơ đồ hộp, **đi qua luồng đọc và luồng ghi** |
+  | 6. Deep dive | 10–15 phút | 2–3 điểm then chốt: nút thắt, consistency, hot key, failure |
+  | 7. Tổng kết | 2–3 phút | Trade-off đã chọn, điểm yếu còn lại, hướng mở rộng |
 
-- [ ] **Câu hỏi requirement nên hỏi**
-  - Ai dùng, bao nhiêu DAU, phân bố địa lý?
-  - Tỉ lệ đọc/ghi? Kích thước dữ liệu mỗi bản ghi?
-  - Cần consistency mạnh ở đâu (tiền, tồn kho) và eventual ở đâu (feed, lượt like)?
-  - Latency mục tiêu (p99)? Availability mục tiêu?
-  - Dữ liệu giữ bao lâu? Có yêu cầu compliance (xoá dữ liệu cá nhân, data residency)?
-- [ ] **Người chấm đánh giá gì**
-  - Làm rõ bài toán mơ hồ, chốt phạm vi hợp lý
-  - Thiết kế chạy được end-to-end trước, rồi mới tối ưu
-  - Biết building block nào dùng khi nào, và **vì sao** không dùng cái khác
-  - Nói trade-off, failure mode, cách vận hành (monitoring, deploy, migration)
-  - Giao tiếp: dẫn dắt, nhận gợi ý, sửa thiết kế khi có thông tin mới
-  - Ở level senior: nhận ra điểm then chốt của bài mà không cần gợi ý (ví dụ bài thanh toán thì là idempotency và ledger, không phải chọn framework)
-- [ ] **Lỗi hay gặp** ⚠️
-  - Nhảy vào chọn Kafka, Cassandra trước khi biết quy mô
-  - Không hỏi requirement, tự giả định rồi thiết kế sai bài
-  - Không nói trade-off: "dùng Redis" mà không nói mất gì khi Redis chết
-  - Vẽ nhiều hộp nhưng không đi qua luồng một request
-  - Over-engineering cho quy mô nhỏ (microservices cho 100 QPS)
-  - Ước lượng quá chi tiết, mất 15 phút tính toán
-  - Im lặng suy nghĩ lâu; nên nghĩ thành tiếng
+- Giải nghĩa các từ trong bảng:
+  - *Functional requirement*: hệ thống làm được gì, ví dụ "rút gọn URL", "xem thống kê click".
+  - *Non-functional requirement*: hệ thống phải tốt tới mức nào: chịu bao nhiêu người, nhanh bao
+    nhiêu, được phép sai lệch hay chết bao lâu.
+  - *QPS* (*queries per second*): số request mỗi giây. *Peak* là mức cao nhất trong ngày.
+  - *Idempotency key*: một mã client gửi kèm request ghi. Server thấy mã đã xử lý rồi thì trả lại
+    kết quả cũ thay vì làm lần hai. Nhờ vậy retry không tạo đơn hay trừ tiền hai lần.
+  - *Deep dive*: đào sâu vào vài điểm khó nhất của bài.
+  - *Hot key*: một key bị truy cập nhiều bất thường, dồn tải lên một node duy nhất.
 
-### Ước lượng back-of-envelope
+*Hỏi gì ở bước requirement*
+- Ai dùng, bao nhiêu người dùng mỗi ngày (*DAU*, *daily active users*), ở những vùng địa lý nào.
+- Tỉ lệ đọc so với ghi.
+- Chỗ nào cần *consistency* mạnh (mọi người luôn thấy dữ liệu mới nhất, ví dụ tiền, tồn kho), chỗ
+  nào chấp nhận eventual (dữ liệu trễ vài giây vẫn được, ví dụ feed, số like).
+- *p99* mục tiêu, tức mức latency mà 99% request phải nhanh hơn.
+- Giữ dữ liệu bao lâu.
+- Compliance: xoá dữ liệu cá nhân theo yêu cầu, *data residency* (dữ liệu phải nằm ở một quốc gia
+  nhất định).
 
-- [ ] **Lũy thừa 2 và đơn vị**
+*Người chấm đánh giá gì*
+- Làm rõ được một đề bài mơ hồ.
+- Có thiết kế chạy được end-to-end trước, rồi mới tối ưu.
+- Biết **vì sao** không dùng phương án khác.
+- Nói được trade-off, *failure mode* (hệ thống hỏng theo kiểu nào) và cách vận hành.
+- Dẫn dắt được buổi nói chuyện, và biết nhận gợi ý của người chấm.
+- Riêng senior: tự nhận ra điểm then chốt của bài. Ví dụ bài thanh toán thì then chốt là
+  idempotency và ledger (sổ cái ghi mọi biến động tiền, module 3.1), không phải chọn framework.
 
-  | Lũy thừa | Xấp xỉ | Đơn vị |
+*Lỗi hay gặp*
+- ⚠️ Chọn Kafka hay Cassandra trước khi biết quy mô.
+- ⚠️ Không hỏi requirement.
+- ⚠️ Nói "dùng Redis" mà không nói mất gì khi Redis chết.
+- ⚠️ Vẽ nhiều hộp nhưng không đi qua luồng nào.
+- ⚠️ Microservices cho hệ 100 QPS.
+- ⚠️ Tính toán mất 15 phút.
+- ⚠️ Im lặng suy nghĩ lâu. Hãy nghĩ thành tiếng.
+
+**Đọc**
+- Alex Xu vol 1, ch.3 *A Framework for System Design Interviews* ([bản online](https://bytebytego.com/courses/system-design-interview/a-framework-for-system-design-interviews))
+- [Hello Interview: System Design in a Hurry](https://www.hellointerview.com/learn/system-design/in-a-hurry/introduction): góc nhìn của người chấm
+
+**Nắm chắc khi**
+- [ ] Làm được một bài 45 phút đúng bảy bước, ghi giờ từng bước, không bước nào lố quá 50%
+- [ ] Liệt kê được 6 câu hỏi requirement cho một đề bất kỳ trong 1 phút
+
+#### 1.2 Ước lượng back-of-envelope
+
+**Vì sao cần học:** Ước lượng là thứ biến "hệ này cần cache không, cần shard không" từ cảm tính
+thành con số. Trong phỏng vấn, người chấm muốn thấy bạn tính nhanh và biết con số nào làm đổi
+thiết kế. Ngoài công việc, câu "cần bao nhiêu server PHP-FPM cho đợt khuyến mãi" dùng đúng các
+công thức ở đây.
+
+**Học gì**
+
+*Các con số cần thuộc*
+- Lũy thừa 2 và đơn vị:
+
+  | Lũy thừa 2 | Xấp xỉ | Đơn vị |
   |---|---|---|
-  | 2^10 | 1 nghìn (10^3) | 1 KB |
-  | 2^20 | 1 triệu (10^6) | 1 MB |
-  | 2^30 | 1 tỉ (10^9) | 1 GB |
-  | 2^40 | 1 nghìn tỉ (10^12) | 1 TB |
-  | 2^50 | 10^15 | 1 PB |
+  | 2^10 | 10^3 | KB |
+  | 2^20 | 10^6 | MB |
+  | 2^30 | 10^9 | GB |
+  | 2^40 | 10^12 | TB |
+  | 2^50 | 10^15 | PB |
 
-  - Kích thước quen thuộc: `int64`/timestamp 8 byte, UUID 16 byte (36 ký tự dạng chuỗi), một ký tự ASCII 1 byte, ký tự tiếng Việt có dấu trong UTF-8 thường 2–3 byte
-- [ ] **Con số độ trễ nên nhớ** (bậc độ lớn)
+- Kích thước thường gặp:
+  - `int64` hay timestamp: 8 byte.
+  - UUID: 16 byte khi lưu nhị phân, 36 ký tự khi lưu dạng chuỗi.
+  - Ký tự tiếng Việt có dấu trong UTF-8: thường 2–3 byte.
+- Độ trễ, tính theo bậc độ lớn:
 
   | Thao tác | Độ trễ gần đúng |
   |---|---|
   | Đọc L1 cache | ~1 ns |
   | Đọc RAM | ~100 ns |
-  | Đọc ngẫu nhiên từ SSD | ~16–100 µs |
+  | Đọc ngẫu nhiên SSD | ~16–100 µs |
   | Round trip trong cùng datacenter | ~0,5 ms |
-  | Seek ổ đĩa quay (HDD) | ~2–10 ms |
+  | Seek HDD | ~2–10 ms |
   | Round trip xuyên lục địa | ~150 ms |
 
-  - Hệ quả: RAM nhanh hơn mạng ~1000 lần, mạng trong DC nhanh hơn round trip xuyên lục địa ~300 lần. Gọi mạng tuần tự 10 lần trong một request là thấy ngay
-- [ ] **QPS từ DAU**
-  - 1 ngày ≈ 86.400 giây ≈ 10^5 giây, nên **1 triệu request/ngày ≈ 12 QPS** trung bình
-  - QPS trung bình = DAU × số request mỗi user mỗi ngày / 86.400
-  - Peak thường gấp 2–10 lần trung bình (tuỳ sản phẩm; flash sale có thể gấp hàng trăm lần)
-- [ ] **Storage** = số bản ghi mỗi ngày × kích thước × số ngày lưu × số bản sao (replication) × hệ số index/overhead
-- [ ] **Bandwidth** = QPS × kích thước response. Ghi và đọc tính riêng
-- [ ] **Ví dụ tính mẫu**: URL shortener, 100 triệu URL mới mỗi tháng, đọc:ghi = 100:1, lưu 5 năm
-  - Ghi: 10^8 / (30 × 10^5) ≈ 40 QPS; peak ×5 ≈ 200 QPS
-  - Đọc: 40 × 100 = 4.000 QPS; peak ≈ 20.000 QPS
-  - Số URL sau 5 năm: 10^8 × 12 × 5 = 6 × 10^9
-  - Storage: 6 × 10^9 × ~500 byte ≈ 3 TB (chưa tính replica)
-  - Cache 20% URL nóng của một ngày: đọc mỗi ngày 4.000 × 10^5 = 4 × 10^8 request; 20% × 4 × 10^8 × 500 byte ≈ 40 GB → vừa một cụm Redis nhỏ
-  - Kết luận ảnh hưởng thiết kế: ghi thấp, đọc cao → cache là trọng tâm; 3 TB vẫn nằm được trên vài node DB, sharding chưa cấp bách
-- [ ] ⚠️ Làm tròn mạnh tay, nói rõ giả định. Mục tiêu là bậc độ lớn, không phải con số chính xác
+  - *Round trip* là thời gian gửi một gói tin đi và nhận trả lời về.
+  - Đọc RAM nhanh hơn một round trip trong datacenter khoảng **5.000 lần** (100 ns so với 0,5 ms).
+  - Round trip xuyên lục địa chậm hơn trong datacenter khoảng 300 lần.
+  - Hệ quả: một request gọi mạng tuần tự 10 lần là thấy chậm ngay.
 
-### Building blocks
+*QPS, storage, bandwidth*
+- Mẹo: 1 ngày ≈ 86.400 giây ≈ 10^5 giây. Nên **1 triệu request/ngày ≈ 12 QPS**.
+- Công thức: QPS = DAU × số request mỗi user / 86.400.
+- Peak thường gấp 2–10 lần trung bình. Flash sale có thể gấp hàng trăm lần.
+- **Storage** = số bản ghi mỗi ngày × kích thước mỗi bản ghi × số ngày lưu × số bản sao × hệ số
+  cho index và overhead.
+- **Bandwidth** = QPS × kích thước response. Tính riêng chiều đọc và chiều ghi.
 
-- [ ] **Scale dọc vs scale ngang** 🟢: dọc (máy to hơn) đơn giản nhưng có trần và là SPOF; ngang (thêm máy) cần service **stateless** (session, file, cache local chuyển ra ngoài)
+*Số server theo QPS*
+- Công thức: số server = peak QPS / (QPS một server chịu được × mức tải mục tiêu) + dự phòng.
+  - Mức tải mục tiêu thường 60–70%, để còn chỗ cho đột biến.
+  - Dự phòng *N+1*: thêm một máy, để một máy chết hay đang bảo trì thì vẫn đủ.
+- QPS một server lấy từ **load test**, không đoán. Con số trong sách chỉ là bậc độ lớn.
 
-| Block | Dùng khi | Chi tiết |
+*Riêng PHP-FPM*
+- Mỗi worker PHP-FPM xử lý một request tại một thời điểm. Theo *Little's law* (số việc đang xử lý
+  = tốc độ đến × thời gian xử lý mỗi việc), suy ra:
+  - QPS một server ≈ **số worker / latency trung bình**.
+  - Ví dụ: 50 worker, latency 100 ms → khoảng 500 QPS.
+- Số worker bị chặn bởi RAM:
+  - `pm.max_children` ≈ RAM dành cho FPM / *RSS* mỗi worker.
+  - RSS (*resident set size*) là lượng RAM thật một process đang chiếm. Phải đo thật, thường vài
+    chục MB.
+- Và bị chặn bởi CPU:
+  - Ví dụ: mỗi request tốn 20 ms CPU, máy 8 core → trần khoảng 400 QPS, dù có bao nhiêu worker.
+  - Thêm worker quá trần CPU chỉ làm latency tăng, vì các worker phải xếp hàng chờ CPU.
+- ⚠️ Tổng số worker cũng là tổng số connection tới DB, vì mỗi worker giữ một connection. Nên số
+  server × `max_children` phải nhỏ hơn `max_connections` của MySQL
+  ([03-database-sql.md](03-database-sql.md) module 2.7).
+- Ví dụ tính số server: peak 5.000 QPS, mỗi server 400 QPS, chạy ở 70%:
+  1. Mỗi server gánh an toàn 400 × 0,7 = 280 QPS.
+  2. 5.000 / 280 ≈ 18 server.
+  3. Cộng 1 dự phòng: 19 server.
+
+*Cache*
+- Theo quy tắc 80/20 (khoảng 20% dữ liệu nhận 80% lượt đọc), cache khoảng 20% dữ liệu nóng của một
+  ngày.
+
+*Ví dụ mẫu: URL shortener*
+- Đề: 100 triệu URL mới mỗi tháng, tỉ lệ đọc:ghi = 100:1, lưu 5 năm.
+- Các bước:
+  1. Ghi: 10^8 / (30 × 10^5) ≈ 40 QPS. Peak ×5 ≈ 200.
+  2. Đọc: 4.000 QPS. Peak ≈ 20.000.
+  3. Số URL sau 5 năm: 10^8 × 12 × 5 = 6 × 10^9.
+  4. Storage: 6 × 10^9 × ~500 byte ≈ 3 TB, chưa tính replica.
+  5. Cache: 4.000 × 10^5 = 4 × 10^8 lượt đọc/ngày. 20% × 4 × 10^8 × 500 byte ≈ 40 GB, vừa một cụm
+     Redis nhỏ.
+- Kết luận: đọc cao, ghi thấp nên cache là trọng tâm. 3 TB chưa cần shard.
+- ⚠️ Làm tròn mạnh tay và nói rõ giả định. Mục tiêu là đúng bậc độ lớn, không phải đúng từng số.
+
+**Đọc**
+- Alex Xu vol 1, ch.2 *Back-of-the-envelope Estimation* ([bản online](https://bytebytego.com/courses/system-design-interview/back-of-the-envelope-estimation))
+- [Latency Numbers Every Programmer Should Know (interactive)](https://colin-scott.github.io/personal_website/research/interactive_latency.html): con số theo năm
+- PHP: [FPM configuration](https://www.php.net/manual/en/install.fpm.configuration.php) (`pm`, `pm.max_children`)
+- Little's law: module 2.4 của [13-concurrency.md](13-concurrency.md)
+
+**Nắm chắc khi**
+- [ ] Ước lượng xong QPS, storage, cache của URL shortener trong 4 phút không cần giấy nháp dài
+- [ ] Tính được số server PHP-FPM cho một hệ 3.000 QPS peak khi biết latency, RSS mỗi worker, RAM và số core, và kiểm tra lại với `max_connections`
+- [ ] Nói được con số ước lượng nào làm thay đổi thiết kế, con số nào không
+
+#### 1.3 Building blocks và scale từ một server
+
+**Vì sao cần học:** Mọi bài system design đều được ráp từ cùng một bộ khối: load balancer, cache,
+DB, queue, object storage. Biết khối nào dùng khi nào, và khi nào **không** nên dùng, là nền của
+mọi bài phía sau. Câu "hệ thống một server, traffic tăng 10 lần thì làm gì" là câu mở màn rất phổ
+biến.
+
+**Học gì**
+
+*Scale dọc và scale ngang*
+
+| | Scale dọc | Scale ngang |
 |---|---|---|
-| Load balancer | Chia tải nhiều instance, health check, TLS termination. L4 (TCP) nhanh, L7 (HTTP) route theo path/header. Thuật toán: round robin, least connections, consistent hashing. ⚠️ Sticky session cản scale và failover; nên đưa session ra Redis | [02](02-networking.md) |
-| API gateway | Một điểm vào: auth, rate limit, routing, logging cho nhiều service | [09](09-api-design.md) |
-| Cache (Redis/Memcached) | Đọc nhiều, dữ liệu chịu được stale, cần latency thấp | [11](11-cache.md) |
-| CDN | File tĩnh, ảnh, video, response công khai; người dùng xa server | [11](11-cache.md), [02](02-networking.md) |
-| SQL DB | Quan hệ, transaction, constraint, query linh hoạt. Mặc định nên chọn | [03](03-database-sql.md) |
-| NoSQL | Ghi rất lớn, schema linh hoạt, truy cập theo key đã biết trước (wide-column, document, KV) | [04](04-nosql-search-storage.md) |
-| Read replica | Đọc nhiều hơn ghi; ⚠️ replication lag, read-your-writes | [03](03-database-sql.md) |
-| Sharding | Dữ liệu hoặc lượng ghi vượt một node; chọn shard key theo pattern truy cập | [03](03-database-sql.md) |
-| Queue / log (Kafka, RabbitMQ, SQS) | Tách việc chậm, làm mượt đỉnh tải, fan-out sự kiện | [12](12-messaging.md) |
-| Object storage (S3) | File, ảnh, video, backup. ⚠️ Không lưu file upload trên đĩa app server | [04](04-nosql-search-storage.md) |
-| Search (Elasticsearch/OpenSearch) | Full-text, filter nhiều chiều, faceting; không làm nguồn dữ liệu gốc | [04](04-nosql-search-storage.md) |
-| Rate limiter | Chống lạm dụng, bảo vệ backend, công bằng giữa tenant | bài bên dưới |
-| ID generator | Cần ID duy nhất toàn cục, sinh phân tán, có thứ tự thời gian | bài bên dưới |
-| Consistent hashing | Chia key cho node sao cho thêm/bớt node chỉ dời ít key (cache cluster, KV store, sharding) | [14](14-distributed-systems.md) |
-| Bloom filter | Kiểm tra "chắc chắn không có" rất rẻ: tránh đọc đĩa, URL đã crawl, username đã tồn tại. Có false positive, không có false negative | [21](21-dsa.md) |
-| Geo index (geohash, quadtree, H3) | Tìm điểm gần nhất | bài nearby search |
-| Stream processing (Flink, Kafka Streams) | Tổng hợp real-time: đếm, window, phát hiện gian lận | [12](12-messaging.md) |
+| Làm gì | Máy to hơn: thêm CPU, RAM | Thêm nhiều máy chạy song song |
+| Độ phức tạp | Đơn giản, không đổi code | Cần app **stateless** |
+| Giới hạn | Có trần: không có máy nào to vô hạn | Gần như không có trần |
+| Rủi ro | Vẫn là *SPOF* (*single point of failure*, một chỗ chết là cả hệ thống chết) | Một máy chết, các máy khác gánh |
 
-- [ ] **Consistent hashing** 🔴 (tóm tắt): đặt node và key lên một vòng hash; key thuộc node đầu tiên theo chiều kim đồng hồ. Thêm/bớt node chỉ dời khoảng 1/N số key. **Virtual node** (mỗi node vật lý nhiều điểm trên vòng) để chia đều và chia theo năng lực máy
-- [ ] **Bloom filter** 🔴 (tóm tắt): mảng bit + k hàm hash. Thêm: bật k bit. Kiểm tra: cả k bit bật → "có thể có"; một bit tắt → "chắc chắn không". Bloom filter chuẩn không xoá được (counting bloom filter thì xoá được)
+- *Stateless* nghĩa là không giữ trạng thái quan trọng trên máy app:
+  - Session ra Redis.
+  - File ra S3.
+  - Không để cache local chứa dữ liệu quan trọng.
 
-### Availability
+*Building block và khi nào dùng*
 
-- [ ] **Bảng số 9**
+  | Block | Dùng khi | Xem |
+  |---|---|---|
+  | Load balancer | chia tải, health check, TLS termination. L4 nhanh, L7 route theo path/header. Round robin, least connections, consistent hashing. ⚠️ Sticky session cản scale và failover | [02](02-networking.md) |
+  | API gateway | một điểm vào: auth, rate limit, routing, logging | [09](09-api-design.md) |
+  | Cache (Redis/Memcached), CDN | đọc nhiều, chịu được stale; file tĩnh, người dùng xa | [11](11-cache.md) |
+  | SQL DB | quan hệ, transaction, constraint. **Mặc định nên chọn** | [03](03-database-sql.md) |
+  | NoSQL | ghi rất lớn, truy cập theo key biết trước | [04](04-nosql-search-storage.md) |
+  | Read replica, sharding | đọc nhiều (⚠️ lag); dữ liệu hoặc ghi vượt một node | [03](03-database-sql.md) |
+  | Queue / log (Kafka, RabbitMQ, SQS) | tách việc chậm, làm mượt đỉnh, fan-out sự kiện | [12](12-messaging.md) |
+  | Object storage (S3) | file, ảnh, video, backup. ⚠️ Không lưu upload trên đĩa app server | [04](04-nosql-search-storage.md) |
+  | Search (Elasticsearch/OpenSearch) | full-text, filter nhiều chiều; không làm nguồn dữ liệu gốc | [04](04-nosql-search-storage.md) |
+  | Stream processing (Flink, Kafka Streams) | tổng hợp real-time, window, gian lận | [12](12-messaging.md) |
+  | 🔴 Consistent hashing | thêm/bớt node chỉ dời ~1/N key; virtual node để chia đều | [14](14-distributed-systems.md) |
+  | 🔴 Bloom filter | "chắc chắn không có" rất rẻ; có false positive, không false negative; bản chuẩn không xoá được | [21](21-dsa.md) |
+  | 🔴 Geo index | tìm điểm gần nhất (module 3.6) | |
+
+- Giải nghĩa các từ trong bảng:
+  - *Health check*: load balancer định kỳ gọi thử từng máy, máy không trả lời thì ngừng gửi
+    request tới.
+  - *TLS termination*: giải mã HTTPS ngay ở load balancer, phía sau đi HTTP thường.
+  - *L4* chia tải theo kết nối TCP, không nhìn nội dung. *L7* đọc được HTTP nên route được theo
+    path, header.
+  - *Round robin* chia lần lượt. *Least connections* chọn máy đang ít kết nối nhất.
+  - *Sticky session*: một user luôn được gửi về cùng một máy. Là cách chữa cháy cho app chưa
+    stateless, và làm mất cân bằng tải khi scale hay khi một máy chết.
+  - *CDN*: mạng máy chủ đặt gần người dùng, giữ bản sao file tĩnh.
+  - *Stale*: dữ liệu cũ hơn bản gốc một chút.
+  - *Read replica*: bản sao của DB chỉ để đọc. *Lag* là độ trễ giữa lúc ghi vào primary và lúc
+    replica thấy.
+  - *Sharding*: chia dữ liệu ra nhiều DB, mỗi DB giữ một phần.
+  - *Fan-out*: một sự kiện được gửi tới nhiều nơi nhận.
+  - *Consistent hashing*: cách gán key vào node sao cho thêm hay bớt một node chỉ phải dời khoảng
+    1/N số key. *Virtual node*: mỗi node thật đứng ở nhiều vị trí để chia tải đều hơn.
+  - *Bloom filter*: cấu trúc rất gọn để hỏi "phần tử này có trong tập không". Trả lời "không" thì
+    chắc chắn không có. Trả lời "có" thì có thể sai (*false positive*).
+
+*Bài "một server, traffic tăng 10 lần"* 🟢
+- Làm theo thứ tự, mỗi bước kèm "đo gì để biết cần bước tiếp":
+  1. Đo nút thắt: CPU app, DB hay mạng. Kiểm tra đã có *APM* (công cụ đo hiệu năng từng request,
+     như New Relic, Datadog) chưa.
+  2. Tách DB ra máy riêng. Tối ưu query và index, thường là bước rẻ và lợi nhất.
+  3. Cache cho dữ liệu đọc nhiều. CDN cho file tĩnh.
+  4. App stateless, đặt load balancer trước nhiều instance.
+  5. Việc chậm đưa vào queue, worker xử lý nền.
+  6. Read replica, tách đường đọc và đường ghi.
+  7. Ghi vượt một node: partition hoặc shard, hoặc chuyển một phần dữ liệu sang store phù hợp hơn.
+  8. Suốt quá trình: monitoring, alert, load test, loại bỏ SPOF.
+
+**Đọc**
+- Alex Xu vol 1, ch.1 *Scale from Zero to Millions of Users* ([bản online](https://bytebytego.com/courses/system-design-interview/scale-from-zero-to-millions-of-users))
+- System Design Primer: các mục *Load balancer*, *Cache*, *Database*, *Asynchronism*
+- Laravel: [Session drivers](https://laravel.com/docs/session), [File Storage](https://laravel.com/docs/filesystem) (để app stateless)
+
+**Nắm chắc khi**
+- [ ] Trả lời được bài "traffic tăng 10 lần" theo 8 bước, mỗi bước nói được chỉ số nào cho thấy cần bước đó
+- [ ] Với mỗi block trong bảng, nói được một trường hợp **không** nên dùng
+
+#### 1.4 Availability
+
+**Vì sao cần học:** Con số "99,9%" xuất hiện trong mọi SLA và mọi cuộc bàn về kiến trúc, nhưng ít
+người đổi được nó ra số phút downtime hay biết mỗi số 9 thêm vào tốn gì. Câu hỏi hay gặp: "99,9%
+là bao nhiêu phút mỗi tháng" (junior) và "cần 99,99% thì bạn thay đổi gì" (senior).
+
+**Học gì**
+
+*Bảng số 9*
+- *Availability* là tỉ lệ thời gian hệ thống phục vụ được.
 
   | Availability | Downtime/năm | Downtime/tháng (30 ngày) |
   |---|---|---|
@@ -171,480 +324,1053 @@
   | 99,99% | ~52,6 phút | ~4,3 phút |
   | 99,999% | ~5,26 phút | ~26 giây |
 
-  - Mỗi số 9 thêm vào đắt hơn nhiều: cần tự động failover (con người không phản ứng kịp trong 4 phút), multi-AZ/region, deploy an toàn
-- [ ] **Chuỗi phụ thuộc**: gọi nối tiếp thì nhân availability (3 thành phần 99,9% → ~99,7%). Chạy song song dự phòng thì tăng: hai bản độc lập 99% → 1 − 0,01² = 99,99% (nếu lỗi thật sự độc lập — ⚠️ thường không)
-- [ ] **SPOF** 🟡: tìm từng thành phần mà chết là cả hệ thống chết: một DB primary, một LB, một Redis, một cron server, một nhà cung cấp DNS, một người duy nhất biết deploy
-- [ ] **Redundancy**: N+1 (dư một), N+2 (dư hai để vẫn an toàn khi đang bảo trì một máy)
-- [ ] **Active-passive vs active-active** 🟡
+- Mỗi số 9 thêm vào đắt hơn nhiều:
+  - *Failover* (chuyển sang bản dự phòng) phải tự động, vì con người không phản ứng kịp trong 4
+    phút.
+  - Phải chạy multi-AZ (xem dưới).
+  - Deploy phải an toàn, vì phần lớn sự cố đến từ thay đổi.
 
-  | | Active-passive | Active-active |
-  |---|---|---|
-  | Cách chạy | Một bản phục vụ, một bản chờ | Cả hai cùng phục vụ |
-  | Failover | Chậm hơn (phát hiện + promote), có thể mất dữ liệu chưa sao chép | Nhanh, traffic chuyển sang bản còn lại |
-  | Tài nguyên | Bản chờ lãng phí | Dùng hết, nhưng mỗi bản phải chịu được toàn bộ tải khi bản kia chết |
-  | Khó ở | Split-brain khi promote | Ghi ở nhiều nơi: xung đột, consistency |
+*Tính availability của nhiều thành phần*
+- Nối tiếp (A gọi B gọi C, một cái chết là cả chuỗi chết): **nhân** các availability.
+  - Ví dụ: 3 thành phần 99,9% → 0,999³ ≈ 99,7%.
+- Song song dự phòng (hai bản, còn một bản sống là được): 1 − (xác suất cả hai cùng chết).
+  - Ví dụ: hai bản 99% → 1 − 0,01² = 99,99%.
+  - ⚠️ Chỉ đúng khi hai bản hỏng thật sự độc lập. Thực tế thường không: cùng một bản deploy lỗi,
+    cùng một nguồn điện, cùng một config.
 
-- [ ] **Multi-AZ, multi-region** 🔴
-  - Multi-AZ: chống mất một datacenter; latency giữa AZ thấp nên replication đồng bộ được. Đây là mức mặc định cho production
-  - Multi-region: chống mất cả vùng, phục vụ người dùng gần hơn; latency giữa region cao nên replication thường bất đồng bộ → RPO > 0, xung đột ghi
-  - Cách phổ biến: đọc ở mọi region, ghi về một region chính; hoặc chia user theo "home region"
-  - Chi tiết HA/DR ở [18-reliability-observability.md](18-reliability-observability.md)
+*SPOF và redundancy*
+- SPOF hay bị bỏ quên:
+  - DB primary.
+  - Một load balancer duy nhất.
+  - Một Redis duy nhất.
+  - Một server chạy cron.
+  - Một nhà cung cấp DNS.
+  - Một người duy nhất biết cách deploy.
+- *Redundancy* là có thêm bản dự phòng:
+  - N+1: thêm một bản.
+  - N+2: thêm hai bản, để vẫn an toàn khi một máy đang bảo trì và một máy khác chết.
 
-### Bài 1: URL shortener 🟢
+*Active-passive và active-active*
 
-- **Requirement**
-  - Functional: tạo mã ngắn cho URL dài, redirect, (tuỳ chọn) custom alias, hết hạn, thống kê click
-  - Non-functional: redirect latency thấp (p99 vài chục ms), availability cao, mã không đoán được (tuỳ yêu cầu)
-- **Ước lượng**: xem ví dụ tính mẫu ở trên (40 QPS ghi, 4.000 QPS đọc, 6 tỉ URL, 3 TB)
-- **API**
-  - `POST /urls {long_url, custom_alias?, expire_at?}` → `{code, short_url}`
-  - `GET /{code}` → `301`/`302` + header `Location`
-- **Data model**: `urls(code PK, long_url, user_id, created_at, expire_at)`. Truy cập chủ yếu theo `code` → KV hoặc SQL đều được
-- **Độ dài mã**: base62 (a-z, A-Z, 0-9). 62^7 ≈ 3,5 × 10^12, dư cho 6 × 10^9
-- **Sinh mã** (điểm deep dive chính)
+| | Active-passive | Active-active |
+|---|---|---|
+| Cách chạy | Một bản phục vụ, một bản chờ | Cả hai cùng phục vụ |
+| Failover | Chậm hơn, phải promote bản chờ | Nhanh, bản kia đang chạy sẵn |
+| Tài nguyên | Bản chờ lãng phí lúc bình thường | Dùng hết, nhưng mỗi bản phải chịu được **toàn bộ tải** khi bản kia chết |
+| ⚠️ Rủi ro | *Split brain* khi promote: cả hai bản cùng tưởng mình là chính và cùng nhận ghi | Ghi ở nhiều nơi thì xung đột dữ liệu |
 
-  | Cách | Ưu | Nhược |
-  |---|---|---|
-  | ID tự tăng/Snowflake → base62 | Không trùng, không cần kiểm tra | Đoán được mã kế tiếp (lộ số lượng, bị cào); cần sinh ID phân tán |
-  | Hash (MD5/SHA) URL, lấy 7 ký tự | Cùng URL ra cùng mã (dedup tự nhiên) | Trùng (collision) → phải kiểm tra và thử lại |
-  | Random 7 ký tự | Không đoán được | Kiểm tra trùng; tỉ lệ trùng tăng khi đầy |
-  | Pre-generate (key service phát sẵn lô mã) | Nhanh, không trùng | Thêm một service; mất lô mã khi server chết (chấp nhận được) |
+*AZ và region*
+- *AZ* (*Availability Zone*) là một hoặc vài datacenter độc lập về điện và mạng trong cùng một
+  vùng. *Region* là một vùng địa lý gồm nhiều AZ, ví dụ Singapore.
+- **Multi-AZ là mặc định cho production.** Các AZ gần nhau nên replication đồng bộ được, tức ghi
+  xong ở cả hai nơi mới báo thành công.
+- Multi-region:
+  - Lợi: chống mất cả một vùng, và gần người dùng hơn.
+  - Giá: các region xa nhau nên replication phải bất đồng bộ. Vì vậy *RPO* (lượng dữ liệu có thể
+    mất khi sự cố) lớn hơn 0.
+  - Mô hình phổ biến: đọc ở mọi region, ghi về một region chính. Hoặc mỗi user có một "home
+    region" để ghi.
+- *Static stability*: khi một AZ chết, các AZ còn lại **đã có sẵn** đủ công suất. Không phụ thuộc
+  vào việc autoscaling kịp tạo thêm máy lúc sự cố.
 
-  - Kiểm tra trùng an toàn: `INSERT` với unique constraint trên `code`, lỗi thì sinh lại. ⚠️ Đừng "SELECT xem có chưa rồi INSERT" (race condition)
-- **Redirect `301` vs `302`**
-  - `301` (permanent): browser cache, lần sau không gọi lại server → giảm tải nhưng **mất thống kê click**
-  - `302` (temporary) hoặc `307`: mọi click qua server → thống kê được, tải cao hơn
-- **Kiến trúc**
+**Đọc**
+- Google SRE: [Embracing Risk](https://sre.google/sre-book/embracing-risk/), [Availability Table](https://sre.google/sre-book/availability-table/)
+- Amazon Builders' Library: [Static stability using Availability Zones](https://aws.amazon.com/builders-library/static-stability-using-availability-zones/)
+- [18-reliability-observability.md](18-reliability-observability.md) (SLO, RPO/RTO, DR)
 
-  ```
-  client ─► CDN/LB ─► API (stateless) ─► Redis cache (code → long_url)
-                                     └─► DB (sharded theo code nếu cần)
-                         └─► Kafka (click event) ─► analytics store
-  ```
-- **Deep dive**
-  - Cache: cache-aside, TTL; URL nóng nằm trong Redis; cache cả kết quả "không tồn tại" ngắn hạn để chống dò mã
-  - Thống kê: ghi click event vào queue bất đồng bộ, không ghi DB trong đường redirect
-  - Sharding theo `code` (hash) khi cần
-- **Trade-off**: mã đoán được vs đơn giản; `301` vs thống kê; consistency (URL vừa tạo phải redirect được ngay → đọc từ primary hoặc ghi cache khi tạo)
-- **Hỏi tiếp**: custom alias trùng? URL độc hại (kiểm tra với danh sách đen)? Xoá URL hết hạn (job dọn dẹp, hoặc TTL của DB)? Rate limit tạo URL?
+**Nắm chắc khi**
+- [ ] Tính được availability của một chuỗi LB → app → Redis → MySQL với số liệu tự giả định, và chỉ ra chỗ nên thêm dự phòng
+- [ ] Liệt kê được mọi SPOF trong hệ thống mình đang làm
 
-### Bài 2: Rate limiter 🟡
+---
 
-- **Requirement**: giới hạn theo user/API key/IP/endpoint; phân tán (nhiều instance gateway); latency thêm vào rất nhỏ; trả `429 Too Many Requests`; quy tắc cấu hình được
-- **Thuật toán**
+### Chặng 2: Làm chủ 🟡
 
-  | Thuật toán | Cách làm | Ưu | Nhược |
-  |---|---|---|---|
-  | Token bucket | Xô chứa tối đa B token, nạp r token/giây; mỗi request lấy 1 token | Cho phép burst tới B, bộ nhớ nhỏ, phổ biến nhất | Hai tham số cần chỉnh |
-  | Leaky bucket | Request vào hàng đợi, xử lý với tốc độ cố định | Output đều | Burst bị xếp hàng/làm chậm |
-  | Fixed window | Đếm trong từng cửa sổ (mỗi phút) | Đơn giản nhất | ⚠️ Burst gấp đôi ở ranh giới cửa sổ (cuối phút này + đầu phút sau) |
-  | Sliding window log | Lưu timestamp mọi request, đếm trong cửa sổ trượt | Chính xác | Tốn bộ nhớ theo số request |
-  | Sliding window counter | Ước lượng: `đếm_hiện_tại + đếm_trước × (phần cửa sổ trước còn nằm trong cửa sổ trượt)` | Gần đúng, rẻ | Xấp xỉ |
+#### 2.1 URL shortener
 
-- **Nơi đặt**: API gateway/edge (chặn sớm), middleware trong service, hoặc cả hai. Rate limit ở client (SDK) chỉ là lịch sự, không tin được
-- **Lưu counter**: Redis, dùng thao tác nguyên tử. ⚠️ `GET` rồi `SET` từ app là race condition; dùng `INCR` + `EXPIRE` (fixed window) hoặc Lua script (token bucket) để đọc-sửa-ghi trong một bước
+**Vì sao cần học:** URL shortener là bài nhập môn kinh điển, gần như chắc gặp ở vòng mid. Bài nhỏ
+nhưng có đủ các ý người chấm muốn thấy: ước lượng dẫn tới quyết định, cách sinh mã không trùng,
+và hiểu hệ quả của một chi tiết HTTP (`301` hay `302`).
 
-  ```lua
-  -- fixed window: KEYS[1] = "rl:{user}:{minute}", ARGV[1] = limit, ARGV[2] = ttl
-  local n = redis.call('INCR', KEYS[1])
-  if n == 1 then redis.call('EXPIRE', KEYS[1], ARGV[2]) end
-  if n > tonumber(ARGV[1]) then return 0 end
-  return 1
-  ```
-- **Response**: `429` + `Retry-After`; thường kèm header báo limit/remaining (`X-RateLimit-*` hoặc theo draft chuẩn `RateLimit-*`)
-- **Deep dive**
-  - Redis chết thì sao: fail-open (cho qua, ưu tiên availability) hay fail-closed (chặn, ưu tiên bảo vệ). Thường fail-open kèm limit local trong bộ nhớ mỗi instance
-  - Latency: mỗi request thêm một round trip Redis (~0,5 ms trong DC). Giảm bằng local counter đồng bộ định kỳ (đổi lấy độ chính xác)
-  - Multi-region: counter theo region (mỗi region một phần quota) hay đồng bộ toàn cục (chậm)
-  - Hot key: một API key lớn dồn vào một Redis node
-- **Trade-off**: chính xác vs rẻ; toàn cục vs cục bộ; fail-open vs fail-closed
-- **Hỏi tiếp**: limit nhiều tầng (per second và per day)? Ưu tiên khách trả tiền? Rate limit theo chi phí request (tính token cho request nặng)? Chống DDoS là việc của tầng khác (WAF, CDN)
+**Học gì**
 
-### Bài 3: Notification system 🟡
+*Ước lượng, API và data model*
+- Ước lượng dẫn tới kết luận: đọc gấp 100 lần ghi → **cache là trọng tâm**. 3 TB chưa cần shard
+  (module 1.2).
+- API:
+  - `POST /urls`: tạo mã rút gọn.
+  - `GET /{code}`: chuyển hướng tới URL gốc.
+- Data model: `urls(code PK, long_url, user_id, created_at, expire_at)`.
 
-- **Requirement**: gửi email, SMS, push (iOS/Android), in-app; gửi ngay và theo lịch; template; tuỳ chọn của người dùng (tắt kênh, giờ yên lặng); không gửi trùng; theo dõi trạng thái gửi
-- **Ước lượng**: ví dụ 10 triệu push/ngày ≈ 120/giây trung bình, nhưng campaign marketing có thể dồn hàng triệu trong vài phút → queue là bắt buộc
-- **Kiến trúc**
+*Độ dài mã*
+- *Base62* là cách viết số bằng 62 ký tự: `0-9`, `a-z`, `A-Z`.
+- Mã 7 ký tự cho 62^7 ≈ 3,5 × 10^12 mã, dư nhiều cho 6 × 10^9 URL trong 5 năm.
 
-  ```
-  service nghiệp vụ ─► Notification API ─► kiểm tra preference, rate limit, render template
-                                        └─► queue theo kênh: [email] [sms] [push]
-                                              │       │       │
-                                         worker   worker   worker ─► SES/SendGrid, Twilio, APNs/FCM
-                                              └─► log trạng thái (sent, delivered, failed)
-  ```
-- **Deep dive**
-  - Queue riêng từng kênh: một provider SMS chậm không chặn email; scale worker riêng
-  - Retry có backoff khi provider lỗi tạm; DLQ khi lỗi vĩnh viễn (token push hết hạn → xoá token)
-  - **Chống gửi trùng**: at-least-once nên phải có idempotency key (`event_id + user_id + channel`), lưu đã gửi trong bảng có unique constraint hoặc Redis `SET NX` với TTL
-  - Ưu tiên: OTP/giao dịch đi queue ưu tiên cao, marketing đi queue thấp; ⚠️ campaign không được làm chậm OTP
-  - Rate limit theo user (không spam) và theo provider (quota của nhà cung cấp)
-  - Theo lịch và múi giờ: lưu thời điểm UTC, tính giờ yên lặng theo timezone của user
-- **Trade-off**: độ tin cậy (at-least-once + dedup) vs đơn giản; gửi đồng bộ trong request (không nên) vs qua queue
-- **Hỏi tiếp**: theo dõi mở email/click? Gộp nhiều thông báo (digest)? Fallback kênh (push thất bại thì SMS)? Opt-out theo luật?
+*Sinh mã (deep dive chính)*
 
-### Bài 4: News feed 🟡
+| Cách | Làm thế nào | Ưu | Nhược |
+|---|---|---|---|
+| ID tăng dần → base62 | ID tự tăng của DB hoặc Snowflake (module 3.3), đổi sang base62 | Không bao giờ trùng | Đoán được mã kế tiếp |
+| Hash URL | Hash URL gốc, lấy 7 ký tự đầu | Cùng URL ra cùng mã | Có thể trùng, phải thử lại |
+| Random | Sinh 7 ký tự ngẫu nhiên | Không đoán được | Phải kiểm tra trùng |
+| Key service | Một service sinh sẵn các lô mã chưa dùng, phát cho app server | Nhanh lúc tạo | Thêm một thành phần phải vận hành |
 
-- **Requirement**: đăng bài; xem feed gồm bài của người mình follow, sắp theo thời gian (hoặc ranking); feed load nhanh (p99 < vài trăm ms); đọc nhiều hơn ghi rất nhiều
-- **Ước lượng**: 100 triệu DAU, mỗi người mở feed 10 lần/ngày → 10^9/10^5 = 10.000 QPS đọc; mỗi người đăng 0,1 bài/ngày → ~100 QPS ghi
-- **API**: `POST /posts`, `GET /feed?cursor=...&limit=20` (cursor pagination, không dùng offset)
-- **Data model**: `posts(id, author_id, content, created_at)`, `follows(follower_id, followee_id)`, feed cache: Redis list/sorted set `feed:{user_id}` chứa post id
-- **Fan-out** (điểm deep dive chính)
+- ⚠️ Kiểm tra trùng bằng `INSERT` với unique constraint rồi bắt lỗi, không "SELECT xem có chưa
+  rồi INSERT". Hai request cùng lúc có thể cùng thấy "chưa có".
 
-  | | Fan-out on write (push) | Fan-out on read (pull) |
-  |---|---|---|
-  | Cách làm | Đăng bài → ghi post id vào feed của mọi follower | Mở feed → lấy bài mới của từng người mình follow rồi merge |
-  | Đọc | Rất nhanh (đọc sẵn một list) | Chậm, fan-out nhiều query |
-  | Ghi | Đắt với người có nhiều follower | Rẻ |
-  | ⚠️ Vấn đề | Người nổi tiếng 10 triệu follower = 10 triệu lần ghi mỗi bài | Người follow 2.000 tài khoản = 2.000 nguồn để merge |
+*Redirect: 301 hay 302*
 
-  - **Hybrid**: người bình thường dùng push; người nổi tiếng (follower vượt ngưỡng) dùng pull. Khi đọc feed: lấy feed đã push + merge bài mới của các tài khoản nổi tiếng mình follow
-  - Không push cho user không hoạt động lâu ngày (tiết kiệm ghi); dựng lại feed khi họ quay lại
-- **Kiến trúc**: Post service ghi DB → phát event `PostCreated` → fan-out worker đọc danh sách follower, ghi vào Redis feed (giữ N bài gần nhất) → Feed service đọc list id, hydrate nội dung từ post cache
-- **Deep dive**
-  - Feed cache chỉ lưu id; nội dung bài lấy từ cache riêng (sửa/xoá bài không cần sửa hàng triệu feed)
-  - Xoá bài: lọc khi đọc (bài đã xoá thì bỏ qua) thay vì xoá khỏi mọi feed
-  - Ranking: thêm tầng tính điểm (tương tác, độ mới); đổi feed từ thời gian sang thứ tự theo điểm
-- **Hỏi tiếp**: like/comment count (counter xấp xỉ, gom ghi)? Media (object storage + CDN)? Feed real-time (push qua WebSocket/SSE)?
+| | `301` | `302` / `307` |
+|---|---|---|
+| Nghĩa | Chuyển vĩnh viễn | Chuyển tạm thời |
+| Browser cache | Có, lần sau browser tự chuyển không hỏi server | Không, lần nào cũng hỏi server |
+| Tải lên server | Giảm | Không giảm |
+| Thống kê click | **Mất**, vì server không thấy các lần sau | Thống kê được |
 
-### Bài 5: Chat / messenger 🟡
+*Đường redirect phải nhẹ*
+- Click event đi qua queue bất đồng bộ. Không ghi DB ngay trong đường redirect.
+- Cache cả kết quả "mã không tồn tại", để kẻ dò mã không đánh thẳng xuống DB.
 
-- **Requirement**: chat 1-1 và nhóm; gửi nhận real-time; lịch sử tin nhắn; trạng thái đã gửi/đã nhận/đã đọc; online presence; nhiều thiết bị; thông báo khi offline
-- **Ước lượng**: 50 triệu DAU, 40 tin/người/ngày → 2 × 10^9 tin/ngày ≈ 20.000 tin/giây; 100 byte/tin → 200 GB/ngày → cần storage ghi nhiều, scale ngang
-- **Kết nối**: WebSocket (hai chiều, giữ kết nối lâu). Long polling là phương án dự phòng. Kết nối stateful → chat server không hoàn toàn stateless
-- **Kiến trúc**
+*Hỏi tiếp hay gặp*
+- Custom alias (người dùng tự chọn mã).
+- Chặn URL độc hại.
+- Dọn URL hết hạn.
+- Rate limit việc tạo URL.
 
-  ```
-  client ═WebSocket═ chat server A ─┐                 ┌─ chat server B ═ người nhận
-                                     ├─► message store │
-                                     └─► pub/sub / routing (user → server nào) ─┘
-                                     └─► push service (APNs/FCM) nếu người nhận offline
-  ```
-  - Session registry: `user_id → chat server` (Redis). Server A nhận tin, lưu, tra registry, chuyển sang server B qua pub/sub hoặc gọi nội bộ
-- **Data model**: `messages(conversation_id, message_id, sender_id, content, created_at)`, partition key `conversation_id`, sắp theo `message_id`. Wide-column (Cassandra/ScyllaDB) hoặc SQL sharded theo `conversation_id`
-- **Deep dive**
-  - **Thứ tự tin nhắn**: không dựa vào đồng hồ client. Dùng id tăng dần trong phạm vi conversation (sequence per conversation, hoặc Snowflake-like id có thời gian)
-  - **Giao tin tin cậy**: client gửi kèm `client_msg_id` (idempotency, retry không tạo tin trùng); server ack sau khi lưu; người nhận ack "đã nhận"; client lưu `last_seen_message_id` để đồng bộ lại khi reconnect
-  - **Nhóm**: nhóm nhỏ fan-out tới từng thành viên; nhóm rất lớn/kênh thì người nhận kéo (giống feed)
-  - **Presence**: heartbeat định kỳ; hết hạn heartbeat → offline. ⚠️ Broadcast thay đổi presence cho mọi bạn bè tốn kém; chỉ gửi cho người đang mở cuộc trò chuyện hoặc lấy khi cần
-  - Nhiều thiết bị: mỗi thiết bị một kết nối và con trỏ đồng bộ riêng
-- **Trade-off**: WebSocket stateful khó scale/deploy (drain kết nối khi deploy); lưu tin vĩnh viễn vs chi phí; end-to-end encryption thì server không đọc được nội dung (không search phía server)
-- **Hỏi tiếp**: gửi file/ảnh? Search lịch sử? Tin nhắn tự huỷ? Chat server chết thì client reconnect tới server khác và đồng bộ thế nào?
+**Đọc**
+- Alex Xu vol 1, ch.8 *Design a URL Shortener* ([bản online](https://bytebytego.com/courses/system-design-interview/design-a-url-shortener))
 
-### Bài 6: Đặt vé / đặt phòng 🟡
+**Nắm chắc khi**
+- [ ] Làm trọn bài trong 45 phút và bảo vệ được cách sinh mã đã chọn
+- [ ] Trả lời được "traffic đọc tăng 100 lần" mà không phải vẽ lại từ đầu (câu 21)
 
-- **Requirement**: xem chỗ còn trống; chọn chỗ; **giữ chỗ tạm** trong N phút để thanh toán; xác nhận; **không bao giờ double booking**; chịu được đợt mở bán
-- **Hai kiểu tồn kho**
-  - Chỗ cụ thể (ghế A12 suất 19h): mỗi ghế một hàng
-  - Số lượng (phòng Deluxe ngày 1/10 còn 5): một hàng đếm theo (loại phòng, ngày)
-- **Data model**
+#### 2.2 Rate limiter
 
-  ```sql
-  -- chỗ cụ thể
-  seats(show_id, seat_no, status, hold_id, hold_until, booking_id,
-        PRIMARY KEY (show_id, seat_no))
-  -- theo số lượng
-  room_inventory(room_type_id, date, total, reserved, PRIMARY KEY (room_type_id, date))
-  ```
-- **Chống double booking** (điểm deep dive chính)
-  - Conditional update nguyên tử, kiểm tra số dòng bị ảnh hưởng:
+**Vì sao cần học:** Rate limiter vừa là bài phỏng vấn phổ biến vừa là thứ bạn cấu hình thật trong
+Laravel (`throttle`). Bài này kiểm tra bạn có hiểu race condition trên Redis không, và biết đánh
+đổi giữa độ chính xác và bộ nhớ của từng thuật toán.
+
+**Học gì**
+
+*Các thuật toán*
+- *Rate limiter* giới hạn số request một client được gửi trong một khoảng thời gian, ví dụ 100
+  request mỗi phút cho mỗi API key.
+
+| Thuật toán | Cách hoạt động | Ưu | ⚠️ Nhược |
+|---|---|---|---|
+| Token bucket | Xô chứa tối đa N token, được nạp đều đặn. Mỗi request lấy một token, hết token thì bị từ chối | Cho phép burst (dồn nhiều request một lúc) tới N. Phổ biến nhất | Phải lưu hai giá trị: số token và lần nạp cuối |
+| Leaky bucket | Request vào hàng đợi, được xử lý ra với tốc độ đều | Output đều | Burst phải chờ |
+| Fixed window | Đếm theo từng cửa sổ cố định, ví dụ từng phút tròn | Đơn giản, rẻ | Ở ranh giới hai cửa sổ có thể lọt gấp đôi limit |
+| Sliding window log | Lưu thời điểm của từng request, đếm trong 60 giây gần nhất | Chính xác | Tốn bộ nhớ |
+| Sliding window counter | Ước lượng từ bộ đếm cửa sổ hiện tại và cửa sổ trước, có trọng số | Xấp xỉ tốt, rẻ | Không chính xác tuyệt đối |
+
+- Ví dụ bẫy fixed window: limit 100/phút.
+  1. 100 request lúc 00:59.
+  2. 100 request lúc 01:00, đã sang cửa sổ mới nên bộ đếm về 0.
+  3. Kết quả: 200 request lọt qua trong khoảng 2 giây.
+
+*Đặt ở đâu*
+- Ở gateway hoặc edge, ở middleware của app, hoặc cả hai.
+- Rate limit ở phía client không tin được, vì client tự sửa được.
+
+*Counter trong Redis phải atomic*
+- ⚠️ `GET` rồi `SET` từ app là race condition: hai request cùng đọc 99, cùng ghi 100, cả hai đều
+  lọt.
+- Cách đúng:
+  - Fixed window: `INCR` rồi `EXPIRE`. `INCR` là atomic.
+  - Token bucket: viết bằng Lua script. Redis chạy trọn một script mà không xen lệnh khác vào.
+
+*Response khi bị chặn*
+- Trả `429 Too Many Requests` kèm header `Retry-After` (bao lâu nữa thì thử lại).
+- Header `RateLimit` và `RateLimit-Policy` theo draft của IETF, chưa thành RFC. Nhiều nơi vẫn dùng
+  `X-RateLimit-*`.
+
+*Deep dive*
+- Redis chết thì làm gì:
+  - *Fail-open*: cho qua hết, có thể kèm limit local trên từng máy.
+  - *Fail-closed*: chặn hết.
+- Mỗi request tốn thêm một round trip tới Redis.
+- Multi-region: chia quota giữa các region thế nào.
+- Hot key: một API key rất lớn dồn toàn bộ counter lên một node Redis.
+
+*Góc Laravel*
+- Định nghĩa bằng `RateLimiter::for()`, gắn middleware `throttle`. Counter lưu trong cache driver.
+
+**Đọc**
+- Alex Xu vol 1, ch.4 *Design a Rate Limiter* ([bản online](https://bytebytego.com/courses/system-design-interview/design-a-rate-limiter))
+- Stripe: [Scaling your API with rate limiters](https://stripe.com/blog/rate-limiters); Cloudflare: [How we built rate limiting capable of scaling to millions of domains](https://blog.cloudflare.com/counting-things-a-lot-of-different-things/) (sliding window counter)
+- IETF: [RateLimit header fields draft](https://datatracker.ietf.org/doc/draft-ietf-httpapi-ratelimit-headers/)
+- Laravel: [Rate Limiting](https://laravel.com/docs/rate-limiting), [Route rate limiting](https://laravel.com/docs/routing#rate-limiting)
+
+**Nắm chắc khi**
+- [ ] Viết được Lua token bucket cho Redis (bài tập 3)
+- [ ] Vẽ được ví dụ fixed window cho qua gấp đôi limit trong 2 giây quanh ranh giới
+
+#### 2.3 Notification system
+
+**Vì sao cần học:** Hệ nào cũng gửi email, SMS, push, và ở PHP đây là việc chạy queue nhiều nhất.
+Hai sự cố hay gặp là gửi trùng cho khách và OTP đến chậm vì bị kẹt sau một campaign marketing.
+Bài này kiểm tra bạn thiết kế queue, retry và chống trùng có bài bản không.
+
+**Học gì**
+
+*Yêu cầu*
+- Kênh: email, SMS, push (qua APNs của Apple và FCM của Google), in-app.
+- Gửi ngay và gửi theo lịch.
+- Template cho nội dung.
+- *Preference* của người dùng: tắt từng kênh, giờ yên lặng theo timezone của họ.
+
+*Vì sao queue là bắt buộc*
+- 10 triệu push mỗi ngày ≈ 120 mỗi giây trung bình, nghe nhỏ.
+- Nhưng một campaign dồn hàng triệu tin trong vài phút. Không có queue thì app và provider đều
+  quá tải.
+- Queue riêng cho từng kênh: provider SMS chậm không chặn email.
+
+*Chống gửi trùng*
+- Queue thường là *at-least-once*: mỗi message được giao ít nhất một lần, có thể nhiều hơn.
+- ⚠️ Vì vậy cần *idempotency key*, ví dụ `event_id + user_id + channel`, và kiểm tra bằng một
+  trong hai cách:
+  - Unique constraint trong DB.
+  - Redis `SET NX` có TTL (chỉ set được nếu key chưa tồn tại).
+
+*Ưu tiên*
+- ⚠️ OTP và thông báo giao dịch đi queue riêng. Campaign không được làm chậm OTP.
+
+*Retry, DLQ, rate limit*
+- Retry có *backoff*: lần sau chờ lâu hơn lần trước.
+- *DLQ* (*dead letter queue*) cho lỗi vĩnh viễn. Ví dụ token push hết hạn thì xoá token, không
+  retry mãi.
+- Rate limit theo user (không spam một người) và theo quota của provider.
+
+*Góc Laravel*
+- Notification hỗ trợ nhiều channel.
+- Implement `ShouldQueue` để gửi qua queue.
+- Tách queue theo kênh.
+
+**Đọc**
+- Alex Xu vol 1, ch.10 *Design a Notification System*
+- Laravel: [Notifications](https://laravel.com/docs/notifications) (mục queueing notifications)
+
+**Nắm chắc khi**
+- [ ] Vẽ được luồng từ service nghiệp vụ tới provider, chỉ ra chỗ dedup và chỗ ưu tiên OTP
+- [ ] Nói được chuyện gì xảy ra khi worker gửi xong nhưng chết trước khi ghi "đã gửi"
+
+#### 2.4 News feed
+
+**Vì sao cần học:** News feed là bài kinh điển để nói về đánh đổi giữa chi phí ghi và chi phí
+đọc. Câu hỏi then chốt luôn là "người có 10 triệu follower đăng bài thì sao". Ý tưởng "cache chỉ
+lưu id" dùng lại được ở rất nhiều hệ khác.
+
+**Học gì**
+
+*Ước lượng*
+- 100 triệu DAU × 10 lần mở feed → 10^9 / 10^5 = 10.000 QPS đọc.
+- 0,1 bài/người/ngày → khoảng 100 QPS ghi.
+
+*Fan-out on write và fan-out on read*
+
+| | Fan-out on write (push) | Fan-out on read (pull) |
+|---|---|---|
+| Cách làm | Khi A đăng bài, ghi id bài vào feed của từng follower | Khi B mở feed, đi lấy bài mới của mọi người B follow rồi trộn |
+| Đọc | Rất nhanh, feed có sẵn | Chậm, phải merge nhiều nguồn |
+| Ghi | Đắt: ⚠️ người nổi tiếng 10 triệu follower = 10 triệu lần ghi | Rẻ, chỉ ghi một bài |
+
+- **Hybrid**:
+  - Người thường: push.
+  - Người nổi tiếng: pull, rồi merge vào lúc đọc.
+  - Không push cho user đã lâu không hoạt động.
+
+*Feed cache chỉ lưu id*
+- Feed cache chỉ lưu **post id**. Nội dung được *hydrate* (lấy nội dung đầy đủ theo id) từ post
+  cache lúc đọc.
+- Lợi: sửa hay xoá bài không phải sửa hàng triệu feed.
+- Xoá bài thì lọc bỏ lúc đọc.
+
+*Phân trang*
+- Dùng *cursor pagination* ("cho tôi 20 bài cũ hơn bài id X"), không dùng offset. Offset vừa chậm
+  ở trang sâu, vừa bị lặp hoặc sót bài khi có bài mới chen vào.
+
+*Hỏi tiếp hay gặp*
+- Ranking (sắp theo độ liên quan thay vì thời gian).
+- Counter like xấp xỉ.
+- Media qua object storage và CDN.
+- Feed real-time.
+
+**Đọc**
+- Alex Xu vol 1, ch.11 *Design a News Feed System* ([bản online](https://bytebytego.com/courses/system-design-interview/design-a-news-feed-system))
+- Facebook: [TAO: The power of the graph](https://engineering.fb.com/2013/06/25/core-infra/tao-the-power-of-the-graph/) (lưu và cache đồ thị xã hội)
+
+**Nắm chắc khi**
+- [ ] Tính được số lần ghi khi một người 10 triệu follower đăng bài theo push, và thiết kế ngưỡng hybrid
+- [ ] Giải thích được vì sao feed cache chỉ nên lưu id
+
+#### 2.5 Chat / messenger
+
+**Vì sao cần học:** Chat là bài về kết nối lâu dài (*stateful*), thứ tự tin nhắn và giao tin tin
+cậy, khác hẳn kiểu request/response quen thuộc của PHP. Với dev PHP, bài này còn kiểm tra bạn có
+biết giới hạn của PHP-FPM và cách Laravel làm real-time không.
+
+**Học gì**
+
+*Ước lượng*
+- 50 triệu DAU × 40 tin → 2 × 10^9 tin/ngày ≈ 20.000 tin/giây.
+- 100 byte/tin → 200 GB/ngày. Storage ghi nhiều, cần scale ngang.
+
+*Kết nối*
+- *WebSocket* là kết nối hai chiều giữ mở lâu giữa client và server. Server đẩy tin xuống được
+  bất kỳ lúc nào.
+- Hệ quả: chat server là stateful, không hoàn toàn stateless, vì nó giữ kết nối của những user cụ
+  thể.
+- *Session registry*: bảng `user_id → chat server đang giữ kết nối` trong Redis.
+- Chuyển tin giữa các chat server qua *pub/sub* (một bên publish, các bên đã subscribe đều nhận).
+
+*Lưu trữ*
+- Partition theo `conversation_id`, trong mỗi partition sắp theo `message_id`.
+- Chọn store: Cassandra hoặc ScyllaDB, hoặc SQL shard theo conversation.
+
+*Thứ tự và giao tin tin cậy*
+- ⚠️ Không dựa vào đồng hồ của client để sắp thứ tự. Dùng sequence tăng dần theo từng conversation,
+  hoặc id có chứa thời gian do server sinh.
+- Giao tin tin cậy:
+  1. Client gắn `client_msg_id` cho mỗi tin, để server bỏ tin trùng khi client retry.
+  2. Server lưu tin xong mới gửi *ack* (xác nhận đã nhận) cho người gửi.
+  3. Người nhận giữ `last_seen_message_id`. Khi reconnect thì xin mọi tin sau id đó.
+
+*Nhóm và presence*
+- Nhóm nhỏ: fan-out tin tới từng thành viên. Kênh rất lớn: thành viên tự kéo về.
+- *Presence* (đang online hay không) dùng heartbeat: client gửi tín hiệu định kỳ, lâu không thấy
+  thì coi là offline.
+- ⚠️ Không broadcast thay đổi presence cho mọi bạn bè. Một người có 1.000 bạn online/offline liên
+  tục sẽ sinh bão message.
+
+*Vận hành*
+- Một user có nhiều thiết bị.
+- Deploy phải *drain* kết nối: ngừng nhận kết nối mới, chờ hoặc chuyển dần kết nối cũ.
+- Có E2E encryption (mã hoá đầu cuối) thì server không đọc được nội dung, nên không search phía
+  server được.
+
+*Góc PHP*
+- PHP-FPM không giữ được WebSocket, vì mỗi worker xử lý xong một request là trả về.
+- Dùng Laravel Reverb hoặc một server WebSocket riêng. Code PHP chỉ publish sự kiện.
+
+**Đọc**
+- Alex Xu vol 1, ch.12 *Design a Chat System* ([bản online](https://bytebytego.com/courses/system-design-interview/design-a-chat-system))
+- Discord: [How Discord Stores Trillions of Messages](https://discord.com/blog/how-discord-stores-trillions-of-messages) (Cassandra sang ScyllaDB, partition theo channel và bucket thời gian)
+- Slack: [Real-time Messaging](https://slack.engineering/real-time-messaging/)
+- Laravel: [Broadcasting](https://laravel.com/docs/broadcasting), [Reverb](https://laravel.com/docs/reverb)
+
+**Nắm chắc khi**
+- [ ] Vẽ được đường đi một tin từ A (server 1) tới B (server 2) và tới B khi offline
+- [ ] Xử lý được tình huống một chat server chết làm 50.000 kết nối rớt cùng lúc (câu 25)
+
+#### 2.6 Đặt vé / đặt phòng
+
+**Vì sao cần học:** Double booking là lỗi tiền thật và khách thật: hai người cùng mua một ghế.
+Bài này kiểm tra bạn có viết được thao tác "kiểm tra và giữ" nguyên tử ngay trong DB không, thay
+vì kiểm tra ở app rồi mới ghi. Đây cũng là nền của flash sale (module 3.2).
+
+**Học gì**
+
+*Hai kiểu tồn kho*
+- Chỗ cụ thể: mỗi ghế một dòng, ví dụ ghế G12 của suất chiếu 20h.
+- Theo số lượng: một dòng đếm cho mỗi loại phòng mỗi ngày, ví dụ "phòng Deluxe ngày 01/05 còn 3".
+
+*Không double booking*
+- Dùng một câu *conditional update* (UPDATE có điều kiện) nguyên tử, rồi kiểm tra *affected rows*
+  (số dòng thật sự bị sửa):
 
   ```sql
   UPDATE seats SET status = 'HELD', hold_id = ?, hold_until = NOW() + INTERVAL 10 MINUTE
   WHERE show_id = ? AND seat_no = ?
     AND (status = 'AVAILABLE' OR (status = 'HELD' AND hold_until < NOW()));
-  -- affected rows = 0 → ghế đã bị người khác giữ
 
   UPDATE room_inventory SET reserved = reserved + 1
   WHERE room_type_id = ? AND date = ? AND reserved < total;
   ```
-  - Đặt nhiều đêm/nhiều ghế: làm trong một transaction, khoá theo thứ tự cố định (sắp theo ngày/số ghế) để tránh deadlock; một dòng thất bại thì rollback cả
-  - Các cách khác: `SELECT ... FOR UPDATE` (pessimistic), optimistic locking với `version`, unique constraint trên `(show_id, seat_no)` ở bảng booking. ⚠️ Kiểm tra ở app rồi mới ghi (check-then-act) là race condition
-- **Giữ chỗ tạm**
-  - Trạng thái: `AVAILABLE → HELD (hold_until) → BOOKED`, hoặc `HELD → AVAILABLE` khi hết hạn/huỷ
-  - Hết hạn: kiểm tra `hold_until` ngay trong điều kiện UPDATE (như trên) nên không phụ thuộc job dọn dẹp chạy đúng giờ; job dọn dẹp chỉ để hiển thị cho đúng
-  - ⚠️ Thanh toán thành công **sau** khi hold hết hạn và ghế đã bán cho người khác → cần quy trình hoàn tiền; hoặc gia hạn hold khi người dùng đã vào bước thanh toán
-- **Mở bán (tải đột biến)**: waiting room/virtual queue, cache sơ đồ ghế (hiển thị có thể hơi cũ, ghi luôn kiểm tra ở DB), rate limit
-- **Trade-off**: pessimistic lock đơn giản nhưng giảm throughput trên hàng nóng; Redis giữ chỗ nhanh nhưng phải đối chiếu với DB là nguồn sự thật
-- **Hỏi tiếp**: overbooking có chủ đích (khách sạn, hãng bay)? Đồng bộ tồn kho với OTA (Booking, Agoda) — lệch tồn kho giữa các kênh? Hoàn/huỷ?
 
-### Bài 7: Thanh toán / ví điện tử 🔴
+  - Affected rows = 1: giữ được.
+  - Affected rows = 0: đã có người khác giữ, báo hết.
+- ⚠️ *Check-then-act* ở app (SELECT thấy còn, rồi UPDATE) là race: hai request cùng thấy còn.
+- Đặt nhiều đêm hoặc nhiều ghế: làm trong một transaction, và khoá theo một thứ tự cố định (ví dụ
+  theo ngày tăng dần) để tránh deadlock.
 
-- **Requirement**: nạp tiền, chuyển tiền giữa ví, thanh toán cho merchant qua cổng thanh toán (PSP); số dư luôn đúng; không trừ tiền hai lần; audit được; đối soát với ngân hàng/PSP
-- **Non-functional**: correctness quan trọng hơn latency; consistency mạnh cho số dư; mọi thay đổi có lịch sử
-- **Nguyên tắc**
-  - Tiền lưu bằng số nguyên theo đơn vị nhỏ nhất (VND không có phần lẻ; USD lưu cent) hoặc `DECIMAL`. ⚠️ Không dùng `float` — xem [22-practical-data.md](22-practical-data.md)
-  - **Ledger theo bút toán kép (double-entry)**: mỗi giao dịch sinh ít nhất hai entry, tổng debit = tổng credit. Không bao giờ chỉ `UPDATE balance` mà không có lịch sử
-  - Entry là **append-only**; sửa sai bằng entry đảo (reversal), không sửa/xoá entry cũ
-- **Data model**
+*Giữ chỗ tạm*
+- Trạng thái đi theo `AVAILABLE → HELD → BOOKED`.
+- Hạn giữ được kiểm tra ngay trong `WHERE` (`hold_until < NOW()`). Vì vậy tính đúng không phụ thuộc
+  vào job dọn hold hết hạn. Job dọn chỉ để dữ liệu gọn.
+- ⚠️ Thanh toán về **sau** khi hold đã hết hạn và ghế đã bán cho người khác. Hai cách xử lý:
+  - Quy trình hoàn tiền tự động.
+  - Gia hạn hold khi người dùng đã vào bước thanh toán.
 
-  ```sql
-  accounts(id, owner_id, currency, balance, version)       -- balance là cache của ledger
-  transactions(id, idempotency_key UNIQUE, type, status, created_at)
-  ledger_entries(id, transaction_id, account_id, direction, amount, created_at)
-  -- chuyển 100.000 từ A sang B: entry debit A 100.000, entry credit B 100.000
-  ```
-- **Chuyển tiền nội bộ**: một transaction DB: insert `transactions`, insert hai entry, cập nhật balance hai tài khoản với điều kiện `balance >= amount` (hoặc khoá `FOR UPDATE` theo thứ tự id để tránh deadlock)
-- **Idempotency** (deep dive 1)
-  - Client gửi `Idempotency-Key`; server lưu key kèm kết quả; request lặp lại trả lại kết quả cũ, không xử lý lần hai
-  - Unique constraint trên key; xử lý trường hợp request thứ hai tới khi request đầu còn đang chạy (trạng thái `PROCESSING`, trả 409 hoặc chờ)
-  - Gọi PSP cũng truyền idempotency key của mình (các PSP lớn đều hỗ trợ)
-- **Luồng với PSP** (deep dive 2)
-  - Trạng thái: `CREATED → PENDING → SUCCEEDED / FAILED`, có thể `UNKNOWN` khi timeout
-  - ⚠️ Timeout khi gọi PSP **không có nghĩa là thất bại**. Không tự retry tạo giao dịch mới; hỏi lại trạng thái (query API) hoặc chờ webhook
-  - Webhook: xác thực chữ ký, xử lý idempotent (webhook đến nhiều lần, sai thứ tự), trả 2xx nhanh rồi xử lý qua queue
-  - Outbox để phát event "đã thanh toán" nhất quán với ghi DB
-- **Reconciliation** (deep dive 3)
-  - Hằng ngày đối chiếu ledger nội bộ với file/báo cáo của PSP và sao kê ngân hàng: khớp theo mã giao dịch, số tiền, trạng thái
-  - Các loại lệch: có ở PSP mà không có ở mình (webhook mất), ngược lại, lệch số tiền/trạng thái
-  - Lệch thì tạo case xử lý (tự động hoặc thủ công), không tự sửa số dư im lặng
-  - Kiểm tra nội bộ: tổng mọi entry = 0 theo từng currency; balance = tổng entry của tài khoản
-- **Trade-off**: consistency mạnh (SQL, transaction) hơn là scale; hot account (ví merchant lớn nhận hàng nghìn giao dịch/giây) → tách sub-account, gom ghi, hoặc cập nhật balance bất đồng bộ từ ledger
-- **Hỏi tiếp**: refund và partial refund? Đa tiền tệ, tỷ giá? Chống gian lận? Giữ tiền (authorization/capture)? Audit và phân quyền truy cập?
+*Lúc mở bán*
+- *Waiting room*: xếp hàng người dùng trước khi cho vào trang chọn ghế.
+- Cache sơ đồ ghế để hiển thị: có thể hơi cũ, nhưng lệnh ghi luôn kiểm tra ở DB.
+- Rate limit.
 
-### Bài 8: Flash sale 🔴
+*Hỏi tiếp hay gặp*
+- Overbooking có chủ đích (khách sạn bán vượt vì biết có tỉ lệ huỷ).
+- Đồng bộ tồn kho với OTA (các sàn đặt phòng như Booking, Agoda).
+- Huỷ và hoàn tiền.
 
-- **Requirement**: 1.000 sản phẩm giá sốc, mở lúc 12:00, hàng triệu người vào cùng lúc; **không bán vượt tồn kho (oversell)**; hệ thống khác (mua hàng thường) không bị ảnh hưởng; công bằng, chống bot
-- **Đặc điểm**: traffic tăng hàng trăm lần trong vài giây, nhưng số đơn thành công rất nhỏ (1.000). Mục tiêu là **từ chối rẻ** càng sớm càng tốt
-- **Kiến trúc theo tầng lọc**
+**Đọc**
+- Alex Xu vol 2, ch.7 *Hotel Reservation System* ([bản online](https://bytebytego.com/courses/system-design-interview/hotel-reservation-system))
+- Module 1.4 của [13-concurrency.md](13-concurrency.md), module 2.6 của [03-database-sql.md](03-database-sql.md)
 
-  ```
-  client (nút mua disable tới giờ, captcha) ─► CDN (trang tĩnh, đồng hồ đếm ngược)
-     ─► gateway (rate limit theo user/IP, chặn bot) ─► waiting room (tuỳ chọn)
-     ─► flash sale service: trừ tồn kho trong Redis (Lua, nguyên tử)
-            └─ thành công ─► queue ─► order worker tạo đơn trong DB, giữ chỗ chờ thanh toán
-            └─ hết hàng   ─► trả "hết hàng" ngay
-  ```
-- **Deep dive**
-  - Trừ kho nguyên tử trong Redis: Lua script kiểm tra `stock > 0` và user chưa mua (set các user đã mua), rồi `DECR`. Nhanh hơn nhiều so với khoá hàng trong DB
-  - DB vẫn là nguồn sự thật: order worker ghi đơn với conditional update trên tồn kho DB; Redis chỉ là bộ lọc trước
-  - Mất đồng bộ Redis–DB: Redis chết/mất dữ liệu → khôi phục từ DB; tồn kho Redis thấp hơn thật thì bán thiếu (chấp nhận được), cao hơn thì DB chặn oversell
-  - Không thanh toán trong hạn → trả hàng về kho (cộng lại Redis và DB)
-  - Cô lập: flash sale chạy trên hạ tầng/cluster riêng hoặc ít nhất pool riêng, để mua hàng thường không chết theo
-  - Chuẩn bị trước: warm cache, scale trước (autoscaling không kịp đỉnh tính bằng giây), load test ở quy mô thật
-- **Trade-off**: công bằng (queue theo thứ tự) vs đơn giản (ai nhanh người đó được); UX (chờ trong waiting room) vs tải
-- **Hỏi tiếp**: một hot key tồn kho làm nghẽn một Redis node → chia tồn kho thành nhiều key (bucket) trên nhiều node? Chống một người dùng nhiều tài khoản?
+**Nắm chắc khi**
+- [ ] Viết được câu UPDATE giữ ghế và giải thích vì sao không cần job dọn hold để đảm bảo đúng
+- [ ] Mô tả được luồng xử lý thanh toán về muộn (bài tập 5)
 
-### Bài 9: Distributed ID generator 🔴
+#### 2.7 Leaderboard
 
-- **Requirement**: duy nhất toàn cục, sinh ở nhiều máy không phối hợp, nhanh; thường cần sắp theo thời gian (tốt cho B-tree index); 64 bit nếu được
-- **Các phương án**
+**Vì sao cần học:** Leaderboard là bài ngắn để kiểm tra bạn có biết dùng đúng cấu trúc dữ liệu của
+Redis không. Sorted set còn dùng cho rất nhiều việc khác như xếp hạng bài viết hay hàng đợi có
+độ ưu tiên.
 
-  | Cách | Ưu | Nhược |
-  |---|---|---|
-  | Auto-increment một DB | Đơn giản, gọn | SPOF, giới hạn throughput, lộ số lượng |
-  | Nhiều DB, mỗi cái bước nhảy khác (offset + step) | Hết SPOF | Khó thêm node, thứ tự không toàn cục |
-  | UUID v4 | Sinh ở đâu cũng được | 128 bit, ngẫu nhiên → ⚠️ chèn vào B-tree clustered index gây phân mảnh |
-  | UUID v7 (RFC 9562) | 128 bit nhưng có timestamp ở đầu → sắp theo thời gian | Vẫn 128 bit, lộ thời điểm tạo |
-  | Snowflake | 64 bit, sắp theo thời gian, phân tán | Cần gán worker id, phụ thuộc đồng hồ |
-  | Segment/range allocation | Mỗi server xin một dải id (1.000 số) từ DB rồi phát trong bộ nhớ | Mất dải khi crash, có khoảng trống |
+**Học gì**
 
-- **Snowflake**: `1 bit dấu | 41 bit timestamp ms | 10 bit machine id | 12 bit sequence`
-  - 41 bit ms ≈ 69 năm kể từ epoch tuỳ chọn; 12 bit sequence = 4.096 id mỗi ms mỗi máy; 10 bit = 1.024 máy
-  - ⚠️ Đồng hồ chạy lùi (NTP chỉnh) → có thể sinh trùng. Xử lý: phát hiện và chờ tới khi đồng hồ vượt timestamp cuối, hoặc từ chối sinh
-  - Gán machine id: config, hoặc xin từ ZooKeeper/etcd/DB khi khởi động
-- **Hỏi tiếp**: id có cần không đoán được (id công khai trên URL)? Có cần sắp chặt chẽ toàn cục (thường không; "gần đúng theo thời gian" là đủ)?
+*Redis sorted set*
+- *Sorted set* là tập các phần tử, mỗi phần tử có một điểm (*score*), luôn được giữ sắp theo điểm.
+- Các lệnh cần nhớ:
+  - Cập nhật điểm: `ZADD` (đặt điểm), `ZINCRBY` (cộng điểm).
+  - Top 10: `ZRANGE key 0 9 REV WITHSCORES`.
+  - Hạng của một user: `ZREVRANK`.
+  - Các thao tác này là O(log N).
+- ⚠️ `ZREVRANGE` đã deprecated từ Redis 6.2. Thay bằng `ZRANGE ... REV`.
 
-### Bài 10: Key-value store 🔴
+*Hạng bằng nhau*
+- Mã hoá cả điểm và thời điểm đạt điểm vào cùng một score, để ai đạt trước xếp trên.
 
-- **Requirement**: `put(key, value)`, `get(key)`; dữ liệu lớn hơn một máy; availability cao; latency thấp; consistency chỉnh được
-- **Thành phần** (theo hướng Dynamo/Cassandra)
-  - **Partition**: consistent hashing với virtual node
-  - **Replication**: mỗi key lưu ở N node kế tiếp trên vòng (thường N = 3, rải qua các AZ)
-  - **Quorum**: ghi thành công khi W node xác nhận, đọc từ R node. `W + R > N` thì đọc chắc chắn chạm ít nhất một bản mới nhất (ví dụ N=3, W=2, R=2). W=1, R=1 nhanh nhưng eventual
-  - **Xung đột**: last-write-wins theo timestamp (đơn giản, có thể mất ghi) hoặc vector clock (phát hiện xung đột, client giải quyết)
-  - **Node tạm chết**: hinted handoff (node khác nhận hộ rồi trả lại); **node lệch lâu**: anti-entropy bằng Merkle tree; read repair khi đọc thấy bản cũ
-  - **Membership, phát hiện lỗi**: gossip protocol
-  - **Storage engine**: LSM-tree — ghi vào WAL + memtable, flush thành SSTable bất biến, compaction gộp file; mỗi SSTable có bloom filter để bỏ qua file chắc chắn không chứa key
-- **Trade-off**: CAP/PACELC — chọn availability (AP) hay consistency (CP) khi partition; chi tiết ở [14-distributed-systems.md](14-distributed-systems.md)
-- **Hỏi tiếp**: thêm node thì dữ liệu di chuyển thế nào? TTL? Range query (consistent hashing phá thứ tự key)?
+*Theo kỳ*
+- Leaderboard theo tuần hay tháng: mỗi kỳ một key, đặt TTL sau khi kỳ kết thúc.
 
-### Bài 11: Web crawler 🔴
+*Nguồn sự thật*
+- DB là nguồn sự thật. Redis mất thì dựng lại được từ DB.
 
-- **Requirement**: crawl hàng tỉ trang, lịch sự với website (politeness), tránh trùng, recrawl trang thay đổi, chịu lỗi
-- **Luồng**: seed URL → **URL frontier** → fetcher (DNS resolver có cache) → lưu nội dung (object storage) → parser trích link → lọc (đã thấy chưa, robots.txt, domain được phép) → đưa lại frontier
-- **Deep dive**
-  - URL frontier: hàng đợi ưu tiên (trang quan trọng/thay đổi nhiều crawl trước) + hàng đợi theo host để đảm bảo politeness (mỗi host một tốc độ, tôn trọng `robots.txt` và crawl-delay)
-  - Dedup URL: chuẩn hoá URL (bỏ fragment, sắp query param...) + bloom filter hoặc set phân tán
-  - Dedup nội dung: hash nội dung (trùng hệt), SimHash/MinHash (gần trùng)
-  - ⚠️ Crawler trap: URL sinh vô hạn (lịch vô tận, session id trong URL) → giới hạn độ sâu, độ dài URL, số trang mỗi host
-  - Phân tán: chia theo hash của host để một host chỉ do một worker phụ trách (dễ giữ politeness)
-- **Hỏi tiếp**: render JavaScript (headless browser, tốn gấp nhiều lần)? Recrawl theo tần suất thay đổi?
+*Quy mô rất lớn*
+- Chia theo khoảng điểm hoặc shard.
+- Hạng chính xác cho nhóm top. Phần còn lại chỉ cần *percentile* xấp xỉ ("bạn nằm trong top 15%").
+- ⚠️ Lấy top-N khi dữ liệu nằm ở nhiều shard: lấy top-N của **từng** shard rồi merge lại.
 
-### Bài 12: Search autocomplete 🔴
+**Đọc**
+- Alex Xu vol 2, ch.10 *Real-time Gaming Leaderboard* ([bản online](https://bytebytego.com/courses/system-design-interview/real-time-gaming-leaderboard))
+- Redis: [Sorted sets](https://redis.io/docs/latest/develop/data-types/sorted-sets/), [ZRANGE](https://redis.io/docs/latest/commands/zrange/)
 
-- **Requirement**: gõ prefix → trả top 5–10 gợi ý phổ biến nhất trong vài chục ms; cập nhật độ phổ biến theo ngày/giờ; lọc từ khoá xấu
-- **Cấu trúc**: **trie**; mỗi node lưu sẵn **top-k** từ khoá của cây con, nên truy vấn là O(độ dài prefix) thay vì duyệt cả cây con
-- **Hai đường**
-  - Offline: log truy vấn → job tổng hợp (theo ngày/giờ, có trọng số độ mới) → build trie mới → phát hành snapshot cho các server phục vụ
-  - Online: server giữ trie trong bộ nhớ, chỉ đọc; thay snapshot nguyên khối khi có bản mới
-- **Deep dive**: shard theo prefix (chú ý phân bố lệch: prefix "a" nhiều hơn "x" rất nhiều); cache kết quả prefix phổ biến ở CDN/browser; client debounce (chờ người dùng ngừng gõ vài chục ms) để giảm request
-- **Trade-off**: độ tươi (trending real-time cần luồng stream riêng) vs đơn giản (build theo lô)
-- **Hỏi tiếp**: cá nhân hoá? Sửa lỗi chính tả? Tiếng Việt có dấu/không dấu (chuẩn hoá bỏ dấu khi index) — xem [22-practical-data.md](22-practical-data.md)
+**Nắm chắc khi**
+- [ ] Viết được các lệnh Redis cho: cộng điểm, top 10, hạng của một user, leaderboard theo tuần
+- [ ] Thiết kế được cách phá hoà bằng thời điểm trong một score kiểu double
 
-### Bài 13: File storage (Google Drive / Dropbox) 🔴
+---
 
-- **Requirement**: upload/download file lớn, đồng bộ nhiều thiết bị, lịch sử phiên bản, chia sẻ; tiết kiệm băng thông và dung lượng
-- **Tách hai loại dữ liệu**: nội dung (block) trên object storage; metadata (file, folder, version, danh sách chunk, quyền) trên SQL — cần consistency mạnh
-- **Deep dive**
-  - **Chunking**: chia file thành block (vài MB). Upload song song, resume khi mất mạng, chỉ upload lại block thay đổi (delta sync). Chunk kích thước cố định đơn giản; content-defined chunking (rolling hash) giữ được ranh giới khi chèn dữ liệu vào giữa file
-  - **Dedup**: định danh block bằng hash nội dung (SHA-256); block đã có thì không upload lại. ⚠️ Dedup chéo người dùng lộ thông tin "file này đã tồn tại" — cân nhắc chỉ dedup trong phạm vi một user
-  - Upload thẳng lên object storage bằng pre-signed URL, không đi qua app server
-  - **Sync**: client giữ con trỏ phiên bản; server thông báo thay đổi (long polling/WebSocket); client kéo danh sách thay đổi rồi tải block thiếu
-  - **Xung đột**: hai thiết bị sửa cùng file offline → không tự merge file nhị phân; tạo "bản xung đột" để người dùng chọn
-  - Version: mỗi version là một danh sách block; block không còn version nào tham chiếu thì dọn (garbage collection)
-- **Hỏi tiếp**: chia sẻ và phân quyền? File rất nóng (link công khai) → CDN? Mã hoá phía client?
+### Chặng 3: Senior 🔴
 
-### Bài 14: Video streaming 🔴 (đại ý)
+#### 3.1 Thanh toán / ví điện tử
 
-- Upload: resumable/multipart lên object storage bằng pre-signed URL
-- Xử lý: queue → transcode sang nhiều độ phân giải/bitrate, cắt thành segment vài giây, tạo manifest **HLS/DASH**, thumbnail. Việc này tốn CPU/GPU, chạy song song theo segment
-- Phát: CDN phục vụ segment; player dùng **adaptive bitrate** (chọn chất lượng theo băng thông hiện tại)
-- Metadata (tiêu đề, trạng thái xử lý, lượt xem) trong DB; lượt xem đếm bất đồng bộ
-- Chi phí chủ yếu là băng thông CDN và storage; video ít người xem có thể không cần transcode mọi độ phân giải
-- Hỏi tiếp: live streaming (độ trễ thấp, khác hẳn VOD)? DRM? Resume vị trí xem?
+**Vì sao cần học:** Bài có tiền là nơi người chấm senior soi kỹ nhất, vì sai một chút là mất tiền
+thật hoặc trừ tiền khách hai lần. Điểm then chốt không nằm ở chọn công nghệ mà ở ledger,
+idempotency và cách xử lý khi không biết giao dịch thành công hay chưa. Red flag kinh điển: chỉ
+có một cột `balance` và `UPDATE`.
 
-### Bài 15: Ride-hailing / nearby search 🔴
+**Học gì**
 
-- **Requirement**: tài xế gửi vị trí vài giây một lần; khách tìm tài xế gần trong bán kính; ghép chuyến; theo dõi chuyến real-time
-- **Ước lượng**: 1 triệu tài xế online, cập nhật mỗi 4 giây → 250.000 ghi/giây. Ghi rất nhiều, dữ liệu vị trí sống ngắn → giữ trong bộ nhớ, không ghi mọi điểm vào DB chính
-- **Geo index**
+*Nguyên tắc và ledger bút toán kép*
+- Đúng quan trọng hơn nhanh.
+- Tiền lưu bằng số nguyên theo đơn vị nhỏ nhất, hoặc `DECIMAL`. ⚠️ Không dùng `float`
+  ([22-practical-data.md](22-practical-data.md)).
+- *Ledger* là sổ cái ghi mọi biến động tiền. *Bút toán kép* (*double-entry*) nghĩa là:
+  - Mỗi giao dịch có ít nhất hai *entry* (dòng ghi): một bên ghi nợ (*debit*), một bên ghi có
+    (*credit*).
+  - Tổng debit luôn bằng tổng credit.
+  - Ví dụ: A chuyển 100.000đ cho B thì có một entry −100.000 ở ví A và một entry +100.000 ở ví B.
+- Entry là **append-only**: chỉ thêm, không sửa, không xoá. Ghi sai thì thêm một entry đảo ngược.
+- Cột `balance` chỉ là cache của ledger, tính lại được từ các entry.
 
-  | Cách | Ý tưởng | Ghi chú |
-  |---|---|---|
-  | Geohash | Mã hoá lat/long thành chuỗi; prefix chung = gần nhau. Độ dài 6 ≈ ô khoảng 1,2 km × 0,6 km | ⚠️ Hai điểm sát nhau nhưng ở hai bên ranh giới ô có prefix khác → phải tìm cả 8 ô lân cận |
-  | Quadtree | Chia ô thành 4 khi quá nhiều điểm | Hợp mật độ không đều (thành phố vs nông thôn); cập nhật động phức tạp hơn |
-  | H3 (lục giác) | Lưới lục giác phân cấp | Khoảng cách tới các ô lân cận đều nhau |
-  | Redis GEO | `GEOADD`, `GEOSEARCH` (bên trong dùng sorted set + geohash) | Tiện cho quy mô vừa |
+*Chuyển tiền nội bộ*
+- Một transaction DB gồm:
+  1. Tạo một dòng trong bảng `transactions`.
+  2. Ghi hai entry.
+  3. Cập nhật balance có điều kiện `balance >= amount`. Hoặc dùng `SELECT ... FOR UPDATE` khoá hai
+     ví theo thứ tự id tăng dần để tránh deadlock.
 
-- **Deep dive**: shard vị trí theo vùng/thành phố; ghép chuyến phải tránh gán một tài xế cho hai khách (khoá/giữ chỗ tài xế có TTL, giống bài đặt vé); lịch sử lộ trình ghi bất đồng bộ qua stream để tính cước/audit
-- **Hỏi tiếp**: surge pricing? ETA (định tuyến trên bản đồ, không phải khoảng cách đường chim bay)?
+*Idempotency ở mọi tầng*
+- Client gửi header `Idempotency-Key`.
+- Server lưu key với unique constraint, và trạng thái `PROCESSING` để request trùng đến trong lúc
+  đang xử lý không chạy song song.
+- Truyền key đó sang *PSP* (*payment service provider*, bên xử lý thanh toán như Stripe, VNPay).
 
-### Bài 16: Leaderboard 🟡
+*Luồng với PSP*
+- Trạng thái: `CREATED → PENDING → SUCCEEDED/FAILED`, và có thêm `UNKNOWN`.
+- ⚠️ Timeout khi gọi PSP **không phải là thất bại**. Tiền có thể đã bị trừ ở phía PSP. Cách xử lý:
+  1. Đặt giao dịch về `UNKNOWN`. Không tạo giao dịch mới.
+  2. Query trạng thái ở PSP bằng cùng mã giao dịch, hoặc chờ webhook.
 
-- **Redis sorted set**: `ZADD` (hoặc `ZINCRBY`) cập nhật điểm, `ZREVRANGE 0 9` lấy top 10, `ZREVRANK` lấy hạng của một user — các thao tác O(log N)
-- Hạng bằng nhau: mã hoá điểm kèm thời điểm (ai đạt trước xếp trên) vào score
-- Leaderboard theo tuần/tháng: mỗi kỳ một key, TTL sau khi hết kỳ
-- DB là nguồn sự thật cho điểm; Redis dựng lại được từ DB
-- Quy mô rất lớn (hàng trăm triệu user): chia theo khoảng điểm/shard; hạng chính xác cho top, hạng xấp xỉ (percentile) cho phần còn lại
-- ⚠️ Top-N ở nhiều shard: lấy top-N mỗi shard rồi merge
+*Webhook*
+- *Webhook* là PSP gọi ngược vào server của bạn để báo kết quả.
+- Xác thực chữ ký, để chắc là PSP gọi chứ không phải kẻ giả mạo.
+- Xử lý idempotent: webhook có thể đến nhiều lần và sai thứ tự.
+- Trả 2xx thật nhanh rồi xử lý qua queue.
+- Event "đã thanh toán" gửi đi qua outbox (ghi event trong cùng transaction với dữ liệu,
+  [12-messaging.md](12-messaging.md)).
 
-### Bài 17: Distributed job scheduler 🔴
+*Reconciliation*
+- *Reconciliation* (đối soát) chạy hằng ngày: so dữ liệu của mình với file của PSP và sao kê ngân
+  hàng.
+- Lệch thì tạo case để người xử lý. Không âm thầm sửa số dư.
+- Kiểm tra tổng các entry bằng 0 theo từng loại tiền.
 
-- **Requirement**: chạy job theo lịch (cron) và job một lần tại thời điểm T; hàng triệu job; không mất job; không chạy trùng (hoặc chạy trùng vô hại); retry; xem lịch sử
-- **Thiết kế cơ bản trên DB**
+*Hot account*
+- *Hot account*: một ví nhận rất nhiều giao dịch cùng lúc, ví dụ ví của merchant lớn. Mọi giao
+  dịch tranh nhau khoá một dòng balance.
+- Cách xử lý:
+  - Chia thành nhiều sub-account.
+  - Gom nhiều giao dịch rồi ghi một lần.
+  - Cập nhật balance bất đồng bộ từ ledger.
 
-  ```sql
-  jobs(id, type, payload, run_at, status, attempts, locked_by, locked_until)
-  -- worker lấy job, nhiều worker không giành nhau:
-  SELECT * FROM jobs WHERE status = 'PENDING' AND run_at <= NOW()
-  ORDER BY run_at LIMIT 100 FOR UPDATE SKIP LOCKED;
-  ```
-  - `SKIP LOCKED` có ở PostgreSQL và MySQL 8. Worker đánh dấu `locked_until` (lease); worker chết thì lease hết hạn và job được lấy lại
-- **Deep dive**
-  - Cron: một "trigger" (chỉ một instance, dùng leader election hoặc lock phân tán) sinh bản chạy cụ thể vào bảng `jobs`; worker pool thực thi. ⚠️ Chạy cron trên mọi instance app = job chạy N lần
-  - Đảm bảo at-least-once → job phải idempotent; exactly-once là ảo tưởng khi worker có thể chết sau khi làm xong nhưng trước khi ghi trạng thái
-  - Retry có backoff, giới hạn số lần, chuyển `FAILED` + alert
-  - Quy mô lớn: partition bảng job theo thời gian/hash; hoặc dùng timing wheel/delay queue; hoặc công cụ có sẵn (Temporal, Quartz cluster, Kubernetes CronJob cho việc đơn giản)
-  - Job chạy lâu: heartbeat gia hạn lease, checkpoint tiến độ để resume
-- **Hỏi tiếp**: phụ thuộc giữa job (DAG, kiểu Airflow)? Múi giờ và DST cho cron? Ưu tiên/fair share giữa tenant?
+**Đọc**
+- Alex Xu vol 2, ch.11 *Payment System* và ch.12 *Digital Wallet*
+- Stripe: [Designing robust and predictable APIs with idempotency](https://stripe.com/blog/idempotency)
+- Modern Treasury: [Accounting for Developers, Part I](https://www.moderntreasury.com/journal/accounting-for-developers-part-i) (bút toán kép cho developer)
+- [Brandur: Idempotency Keys](https://brandur.org/idempotency-keys)
 
-### Bài 18: Metrics / logging system 🔴
+**Nắm chắc khi**
+- [ ] Thiết kế được schema ledger và câu SQL kiểm tra ledger cân bằng (bài tập 4)
+- [ ] Kể được từng bước xử lý khi gọi PSP bị timeout, tới lúc tiền được xác nhận hoặc hoàn
 
-- **Metrics**: agent trên mỗi máy thu (hoặc Prometheus pull) → TSDB. Dữ liệu dạng `(metric, labels, timestamp, value)`; ghi rất nhiều, đọc theo khoảng thời gian
-  - Nén theo thời gian, downsampling (giữ dữ liệu 10 giây trong 2 tuần, dữ liệu 5 phút trong 1 năm)
-  - ⚠️ Cardinality: label có giá trị không giới hạn (user_id, URL đầy đủ) làm số time series bùng nổ
-- **Logging**: app ghi stdout → agent (Fluent Bit, Vector, Promtail) → buffer (Kafka) → xử lý (parse, lọc PII, sampling) → lưu (Elasticsearch/OpenSearch: index full-text, đắt; Loki: chỉ index label, rẻ hơn, query chậm hơn) → object storage cho lưu lâu
-  - Kafka làm buffer để hệ lưu trữ chậm/chết không làm mất log hoặc làm nghẽn app
-  - Retention theo tầng nóng/ấm/lạnh để kiểm soát chi phí
-- **Alerting**: rule engine đánh giá định kỳ, gom nhóm, định tuyến tới on-call
-- Chi tiết khái niệm ở [18-reliability-observability.md](18-reliability-observability.md)
+#### 3.2 Flash sale
 
-### Bài 19: "Một server, traffic tăng 10 lần" 🟢
+**Vì sao cần học:** Flash sale là bài gộp của rate limit, cache, queue và chống oversell dưới tải
+cực đỉnh. Các sàn thương mại điện tử ở Việt Nam chạy flash sale thường xuyên, và sự cố "bán vượt
+số lượng" là câu hỏi tình huống rất hay gặp.
 
-Trả lời theo từng bước, mỗi bước kèm "đo cái gì để biết cần bước tiếp":
-1. Đo: nút thắt là CPU app, DB, hay mạng? Có APM chưa?
-2. Tách DB ra máy riêng; tối ưu query và index (thường là cải thiện lớn nhất, rẻ nhất)
-3. Thêm cache (Redis) cho dữ liệu đọc nhiều; CDN cho file tĩnh
-4. Làm app stateless (session ra Redis, file ra S3), thêm load balancer và nhiều instance
-5. Đẩy việc chậm vào queue + worker
-6. Read replica cho DB; tách đọc/ghi
-7. Khi ghi vượt một node: partition/sharding, hoặc tách một phần dữ liệu sang store phù hợp
-8. Suốt quá trình: monitoring, alert, load test, loại bỏ SPOF (LB dự phòng, DB có standby)
+**Học gì**
 
-## Senior trả lời khác gì
+*Mục tiêu: từ chối rẻ*
+- Traffic tăng hàng trăm lần trong vài giây, nhưng chỉ 1.000 đơn thành công. Tuyệt đại đa số
+  request sẽ bị từ chối.
+- Vì vậy mục tiêu là **từ chối càng rẻ và càng sớm càng tốt**, trước khi request chạm tới DB.
 
-| Câu hỏi | Junior/mid | Senior |
+*Các tầng lọc*
+1. Client: nút bị disable tới đúng giờ, captcha.
+2. CDN: phục vụ trang tĩnh.
+3. Gateway: rate limit, chặn bot.
+4. Waiting room: xếp hàng người dùng.
+5. Flash sale service.
+
+*Trừ kho*
+1. Trừ kho nguyên tử trong Redis bằng Lua script: kiểm tra `stock > 0` và user chưa mua, rồi
+   `DECR`.
+2. Thành công thì đẩy vào queue.
+3. Worker tạo đơn trong DB.
+
+*DB vẫn là nguồn sự thật*
+- Worker ghi đơn bằng conditional update (module 2.6).
+- Hai trường hợp lệch:
+  - Redis thấp hơn thật: bán thiếu. Chấp nhận được.
+  - Redis cao hơn thật: DB chặn, không oversell.
+- Người dùng không thanh toán trong hạn: trả kho ở cả Redis và DB.
+
+*Cô lập và chuẩn bị*
+- Chạy flash sale trên cluster hoặc pool riêng, để luồng mua hàng thường không chết theo.
+- Scale **trước** giờ mở bán. Autoscaling không kịp một đỉnh tính bằng giây.
+- Load test ở quy mô thật.
+- Hot key tồn kho: chia tồn kho thành nhiều bucket nằm trên nhiều node Redis.
+
+**Đọc**
+- Shopify: [Surviving Flashes of High-Write Traffic Using Scriptable Load Balancers](https://shopify.engineering/surviving-flashes-of-high-write-traffic-using-scriptable-load-balancers-part-i)
+- Module 3.4 của [13-concurrency.md](13-concurrency.md)
+
+**Nắm chắc khi**
+- [ ] Vẽ được các tầng lọc và ước lượng số request còn lại sau mỗi tầng cho 1 triệu người
+- [ ] Điều tra được sự cố "bán 1.012 trên 1.000" (câu 24)
+
+#### 3.3 Distributed ID generator và key-value store
+
+**Vì sao cần học:** Hai bài hạ tầng này hay xuất hiện ở vòng senior vì chúng buộc bạn nói về các
+khái niệm của hệ phân tán: phân vùng, replication, quorum, xung đột. Snowflake và UUIDv7 cũng là
+lựa chọn thật khi thiết kế primary key cho hệ nhiều service.
+
+**Học gì**
+
+*Distributed ID*
+
+| Cách | Mô tả | ⚠️ Lưu ý |
 |---|---|---|
-| Thiết kế URL shortener | Vẽ ngay API + DB + cache | Hỏi quy mô, tỉ lệ đọc/ghi, có cần thống kê không; ước lượng để thấy cache là trọng tâm và sharding chưa cần; so các cách sinh mã; nói `301`/`302` ảnh hưởng thống kê |
-| Rate limiter | "Dùng Redis đếm" | So thuật toán theo burst và bộ nhớ; nói thao tác nguyên tử (Lua); Redis chết thì fail-open hay fail-closed; latency thêm vào; multi-region |
-| Đặt vé chống double booking | "Kiểm tra còn chỗ rồi insert" | Conditional update/unique constraint, không check-then-act; hold có hạn kiểm tra ngay trong câu UPDATE; thanh toán về muộn sau khi hold hết hạn thì hoàn tiền |
-| Thanh toán | "Trừ balance trong transaction" | Ledger kép append-only, idempotency key ở mọi tầng, timeout ≠ thất bại, webhook idempotent, reconciliation hằng ngày, hot account |
-| Cần 99,99% | "Thêm server" | 99,99% ≈ 52 phút/năm nên failover phải tự động; tính availability của chuỗi phụ thuộc; multi-AZ; deploy an toàn (canary) vì phần lớn sự cố đến từ thay đổi |
-| Chọn DB | "NoSQL vì scale" | Bắt đầu bằng pattern truy cập và yêu cầu consistency; SQL là mặc định cho tới khi có lý do cụ thể; nói rõ mất gì khi đổi |
+| Auto-increment | DB cấp id tăng dần | Một DB là SPOF và nút thắt ghi |
+| Nhiều DB bước nhảy khác nhau | DB 1 cấp 1, 3, 5...; DB 2 cấp 2, 4, 6... | Khó thêm DB |
+| UUIDv4 | 128 bit ngẫu nhiên | Phân mảnh B+tree khi làm primary key |
+| UUIDv7 | 128 bit, phần đầu là thời gian | Tăng dần nên insert tốt |
+| Snowflake | 64 bit: `1 \| 41 bit ms \| 10 bit machine \| 12 bit sequence` | Phụ thuộc đồng hồ |
+| Segment allocation | Service lấy từ DB một khoảng id (ví dụ 1.000 id) rồi cấp dần | Id không liên tục khi service khởi động lại |
 
-## Tình huống
+- Snowflake:
+  - 41 bit ms đủ dùng khoảng 69 năm.
+  - 12 bit sequence cho 4.096 id mỗi ms mỗi máy.
+  - 10 bit machine cho 1.024 máy.
+  - ⚠️ Đồng hồ chạy lùi (ví dụ sau khi đồng bộ NTP) có thể sinh id trùng. Phải phát hiện và chờ
+    hoặc từ chối.
+  - Machine id gán bằng config, hoặc xin từ ZooKeeper, etcd hay DB.
+- Chi tiết ở module 2.7 của [14](14-distributed-systems.md).
 
-1. **Người phỏng vấn nói "Thiết kế Instagram" rồi im lặng.**
-   - Gợi ý: đừng thiết kế cả Instagram. Chốt phạm vi: đăng ảnh, follow, xem feed; bỏ qua story, DM, search
-   - Hỏi DAU, tỉ lệ đọc/ghi, yêu cầu latency; nói thành tiếng các giả định
-   - Deep dive vào feed (fan-out) và lưu ảnh (object storage + CDN)
+*Key-value store (hướng Dynamo/Cassandra)*
+- Partition:
+  - Dùng consistent hashing kèm virtual node (module 1.3).
+  - Mỗi key lưu ở N node kế tiếp nhau trên vòng hash, rải qua các AZ.
+- *Quorum*: ghi thành công khi W node xác nhận, đọc khi hỏi R node.
+  - `W + R > N` thì tập node đọc và tập node ghi luôn giao nhau, nên đọc thấy bản ghi mới nhất
+    trong điều kiện bình thường.
+  - W=1, R=1: nhanh nhưng chỉ eventual.
+- Xử lý xung đột khi hai bản ghi cùng lúc:
+  - *LWW* (*last write wins*): bản có timestamp mới hơn thắng. Đơn giản, nhưng có thể mất ghi.
+  - *Vector clock*: theo dõi phiên bản theo từng node, phát hiện được hai bản xung đột để app tự
+    gộp.
+- Xử lý node lỗi:
+  - Node tạm chết: *hinted handoff*, node khác giữ hộ dữ liệu rồi trả lại khi node sống lại.
+  - Lệch lâu: *anti-entropy* bằng *Merkle tree* (cây hash để so nhanh hai node lệch nhau ở đâu).
+  - *Read repair*: lúc đọc thấy node nào cũ thì sửa luôn.
+- Membership (node nào đang sống) lan truyền bằng *gossip*: mỗi node định kỳ trao đổi thông tin
+  với vài node ngẫu nhiên.
+- Storage engine *LSM*, theo thứ tự ghi:
+  1. Ghi vào *WAL* (log ghi trước, để không mất khi crash).
+  2. Ghi vào *memtable* trong RAM.
+  3. Memtable đầy thì flush ra file *SSTable* đã sắp xếp, bất biến.
+  4. Ở chế độ nền, *compaction* gộp các SSTable lại.
 
-2. **Đang giữa bài URL shortener, người phỏng vấn nói "giờ traffic đọc tăng 100 lần".**
-   - Gợi ý: ước lượng lại; cache hit rate và dung lượng cache; CDN cache redirect (nếu dùng `301` hoặc cache ngắn với `302`)
-   - Hot key: vài URL viral → cache local trong app (in-process) trước Redis
-   - DB đọc: replica; nói chuyện gì xảy ra khi cache cluster chết (thundering herd) — xem [11-cache.md](11-cache.md)
+  Mỗi SSTable có một bloom filter, để đường đọc bỏ qua được các file chắc chắn không chứa key.
 
-3. **Bài ví điện tử: "Gọi PSP bị timeout, giờ làm gì?"**
-   - Gợi ý: trạng thái `UNKNOWN`, không tạo giao dịch mới; query trạng thái với cùng mã giao dịch; chờ webhook
-   - Job định kỳ quét các giao dịch `UNKNOWN`/`PENDING` quá lâu để hỏi lại
-   - Reconciliation cuối ngày bắt các trường hợp còn sót; không cộng/trừ tiền cho tới khi biết chắc
+*Hỏi tiếp hay gặp*
+- Thêm node thì dữ liệu di chuyển thế nào.
+- TTL.
+- Range query: consistent hashing phá thứ tự của key, nên quét một khoảng key rất khó.
 
-4. **Flash sale: sau đợt bán, phát hiện bán 1.012 sản phẩm trong khi chỉ có 1.000.**
-   - Gợi ý: tìm chỗ check-then-act (đọc tồn kho rồi mới trừ), cache tồn kho không nguyên tử, retry tạo đơn trùng
-   - Sửa: trừ kho nguyên tử (Lua/conditional update), DB là chốt chặn cuối, idempotency khi tạo đơn
-   - Xử lý hậu quả: liên hệ khách, hoàn tiền, và postmortem
+**Đọc**
+- Alex Xu vol 1, ch.7 *Design a Unique ID Generator*, ch.5 *Consistent Hashing* ([bản online](https://bytebytego.com/courses/system-design-interview/design-consistent-hashing)), ch.6 *Design a Key-Value Store* ([bản online](https://bytebytego.com/courses/system-design-interview/design-a-key-value-store))
+- [Dynamo paper](https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf)
+- DDIA ch.3 (LSM-tree)
 
-5. **Thiết kế chat: một chat server chết, 50.000 kết nối rớt cùng lúc.**
-   - Gợi ý: client reconnect có backoff + jitter để không dội vào server còn lại
-   - Tin nhắn không mất vì đã lưu trước khi ack; client đồng bộ theo `last_seen_message_id`
-   - Session registry phải hết hạn/cập nhật; tin gửi trong lúc đó đi đường push
+**Nắm chắc khi**
+- [ ] Vẽ được đường ghi và đường đọc của KV store với N=3, W=2, R=2, có một node chết
+- [ ] Giải thích được vai trò bloom filter trong đường đọc của LSM
 
-6. **Scheduler: job gửi báo cáo chạy hai lần mỗi sáng từ khi scale app lên 2 instance.**
-   - Gợi ý: cron chạy trên mọi instance; dùng lock phân tán/leader election, hoặc tách cron ra một process duy nhất, hoặc bảng job với `SKIP LOCKED`
-   - Và làm job idempotent (ghi dấu "đã gửi báo cáo ngày X") để trùng cũng vô hại
+#### 3.4 Web crawler và search autocomplete
 
-## ❓ Câu hỏi hay gặp
+**Vì sao cần học:** Crawler và autocomplete là hai bài có cấu trúc dữ liệu riêng (hàng đợi theo
+host, trie) và phần xử lý offline. Autocomplete còn có góc riêng cho tiếng Việt: người dùng gõ
+không dấu nhưng vẫn phải ra kết quả có dấu.
 
-🟢
-- Scale dọc và scale ngang khác nhau thế nào? Vì sao scale ngang cần stateless?
-- 99,9% availability là bao nhiêu phút downtime mỗi tháng?
-- Hệ thống của bạn đang chạy trên một server. Traffic tăng gấp 10 lần, bạn làm gì theo từng bước?
-- Vì sao không lưu file upload trên ổ đĩa của app server?
+**Học gì**
 
-🟡
-- Thiết kế URL shortener phục vụ 100 triệu URL mới mỗi tháng.
-- Thiết kế rate limiter cho API gateway.
-- Fan-out on write và fan-out on read khác nhau thế nào? Xử lý người nổi tiếng ra sao?
-- Thiết kế hệ thống notification đa kênh không gửi trùng.
-- Thiết kế đặt phòng khách sạn không bị double booking.
-- Active-passive và active-active khác nhau thế nào?
+*Web crawler*
+- Luồng chính, theo vòng:
+  1. *Seed*: danh sách URL khởi đầu.
+  2. *URL frontier*: hàng đợi các URL sẽ tải.
+  3. Fetcher tải trang. DNS có cache, vì tra DNS cho từng URL rất chậm.
+  4. Lưu nội dung vào object storage.
+  5. Parser tách link từ trang.
+  6. Lọc link.
+  7. Đưa link mới vào lại frontier.
+- Frontier gồm hai phần:
+  - Hàng đợi ưu tiên: trang quan trọng tải trước.
+  - Hàng đợi theo từng host, để đảm bảo *politeness*: tôn trọng `robots.txt` và crawl-delay, không
+    dội request vào một website.
+- Dedup:
+  - URL: chuẩn hoá URL, rồi kiểm tra bằng bloom filter.
+  - Nội dung trùng hệt: so hash.
+  - Nội dung gần trùng: SimHash hoặc MinHash.
+- ⚠️ *Crawler trap*: các trang sinh URL vô tận, như lịch có nút "tháng sau" mãi mãi, hoặc session
+  id trong URL. Cách chặn: giới hạn độ sâu, độ dài URL, số trang mỗi host.
+- Chia việc theo hash của host, để mỗi host chỉ do một worker phụ trách. Nhờ vậy dễ giữ
+  politeness.
 
-🔴
-- Thiết kế ví điện tử: ledger, idempotency, reconciliation.
-- Thiết kế flash sale 1.000 sản phẩm cho 1 triệu người.
-- Snowflake ID gồm những phần nào? Đồng hồ chạy lùi thì sao?
-- Thiết kế key-value store phân tán: partition, replication, quorum.
-- Thiết kế Dropbox: chunking, dedup, sync, xung đột.
-- Tìm tài xế gần nhất: geohash hay quadtree?
-- Thiết kế job scheduler phân tán không chạy trùng.
+*Search autocomplete*
+- *Trie* là cây mà mỗi node là một ký tự, đi từ gốc xuống là ghép thành prefix.
+- Mỗi node lưu sẵn top-k gợi ý của cây con bên dưới. Truy vấn chỉ cần đi xuống theo prefix, nên
+  O(độ dài prefix).
+- Offline, theo từng bước:
+  1. Thu log truy vấn.
+  2. Tổng hợp tần suất, có trọng số cho độ mới.
+  3. Build trie.
+  4. Phát hành snapshot.
+- Online: server giữ trie chỉ đọc trong bộ nhớ.
+- Scale:
+  - Shard theo prefix. ⚠️ Phân bố lệch: prefix "a" nhiều hơn "x" rất nhiều.
+  - Cache prefix phổ biến ở CDN và browser.
+  - Client *debounce*: chờ người dùng ngừng gõ một chút rồi mới gửi.
+- Tiếng Việt: chuẩn hoá bỏ dấu khi index ([22-practical-data.md](22-practical-data.md)).
+
+**Đọc**
+- Alex Xu vol 1, ch.9 *Design a Web Crawler* ([bản online](https://bytebytego.com/courses/system-design-interview/design-a-web-crawler)) và ch.13 *Design a Search Autocomplete System*
+
+**Nắm chắc khi**
+- [ ] Thiết kế được frontier đảm bảo mỗi host tối đa 1 request/giây với 1.000 worker
+- [ ] Giải thích được vì sao lưu top-k ở mỗi node trie, và cái giá khi cập nhật
+
+#### 3.5 File storage (Drive/Dropbox) và video streaming
+
+**Vì sao cần học:** Upload và phục vụ file lớn là việc dev PHP gặp thường xuyên, và cách làm sai
+phổ biến là cho file đi xuyên qua app server. Bài Dropbox kiểm tra bạn tách metadata khỏi dữ liệu,
+chia chunk và đồng bộ. Bài video chủ yếu kiểm tra bạn biết pipeline và chỗ tốn tiền.
+
+**Học gì**
+
+*File storage: tách block và metadata*
+- Nội dung file chia thành các *block* lưu ở object storage.
+- *Metadata* (tên file, thư mục, phiên bản, danh sách block) lưu ở SQL, cần consistency mạnh.
+
+*Chunking*
+- Chia file thành các chunk vài MB. Lợi:
+  - Upload song song.
+  - Upload tiếp khi bị ngắt (*resume*).
+  - *Delta sync*: sửa file thì chỉ upload lại chunk bị đổi.
+- *Content-defined chunking*: ranh giới chunk được chọn theo nội dung chứ không theo vị trí cố
+  định. Chèn thêm dữ liệu vào giữa file thì chỉ vài chunk quanh chỗ chèn bị đổi. Với chunk cố
+  định, mọi chunk phía sau đều lệch.
+
+*Dedup*
+- Dedup bằng hash nội dung: hai chunk cùng hash chỉ lưu một bản.
+- ⚠️ Dedup chéo giữa các user làm lộ thông tin: upload xong ngay lập tức nghĩa là "file này đã có
+  người khác lưu".
+
+*Upload thẳng lên object storage*
+- Dùng *pre-signed URL*: server ký một URL có hạn, client upload thẳng lên S3 bằng URL đó. File
+  không đi qua app server.
+- Laravel có `temporaryUploadUrl`.
+
+*Sync*
+- Mỗi client giữ con trỏ phiên bản, tức "tôi đã đồng bộ tới phiên bản nào".
+- Server báo thay đổi bằng long polling hoặc WebSocket.
+- Xung đột: tạo một "bản xung đột" riêng. Không tự merge file nhị phân.
+- Mỗi version là một danh sách block. Block không còn version nào tham chiếu thì được *garbage
+  collect* (dọn đi).
+
+*Video (đại ý)*
+- Pipeline, theo từng bước:
+  1. Upload *resumable* (tiếp được khi bị ngắt).
+  2. Đưa vào queue.
+  3. *Transcode* ra nhiều bitrate, cắt thành các segment ngắn.
+  4. Tạo manifest theo chuẩn **HLS** hoặc **DASH** (file liệt kê các segment và các mức chất lượng).
+  5. Phân phối qua CDN.
+- Player dùng *adaptive bitrate*: tự đổi chất lượng theo tốc độ mạng.
+- Chi phí chủ yếu là băng thông CDN và storage. Video ít người xem không cần transcode mọi độ phân
+  giải.
+- Live streaming là bài khác hẳn.
+
+**Đọc**
+- Alex Xu vol 1, ch.15 *Design Google Drive* và ch.14 *Design YouTube* ([bản online](https://bytebytego.com/courses/system-design-interview/design-youtube))
+- Dropbox: [Streaming File Synchronization](https://dropbox.tech/infrastructure/streaming-file-synchronization), [Rewriting the heart of our sync engine](https://dropbox.tech/infrastructure/rewriting-the-heart-of-our-sync-engine)
+- AWS: [Uploading objects with presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html); Laravel: [Temporary Upload URLs](https://laravel.com/docs/filesystem#temporary-upload-urls)
+- [RFC 8216](https://www.rfc-editor.org/rfc/rfc8216) (HLS): lướt mục 4 để biết manifest trông thế nào
+
+**Nắm chắc khi**
+- [ ] Vẽ được luồng sửa 1 byte giữa file 1 GB và chỉ ra bao nhiêu dữ liệu phải upload lại với chunk cố định so với content-defined
+- [ ] Thiết kế được luồng upload file 5 GB từ app Laravel mà app server không chạm vào nội dung
+
+#### 3.6 Ride-hailing / nearby search
+
+**Vì sao cần học:** Grab, Be, các app giao đồ ăn đều dựa trên bài toán "tìm điểm gần nhất". Bài
+này kiểm tra hai thứ: xử lý lượng ghi vị trí rất lớn, và hiểu geo index hoạt động ra sao, nhất là
+bẫy ranh giới ô của geohash.
+
+**Học gì**
+
+*Ước lượng và lưu vị trí*
+- 1 triệu tài xế cập nhật vị trí mỗi 4 giây → 250.000 ghi/giây.
+- Vị trí chỉ có giá trị trong thời gian ngắn, nên giữ trong bộ nhớ. Không ghi mọi điểm vào DB chính.
+
+*Geo index*
+
+| Cách | Ý tưởng | Hợp khi |
+|---|---|---|
+| Geohash | Mã hoá toạ độ thành chuỗi. Hai điểm có prefix chung dài thì gần nhau | Đơn giản, dùng index chuỗi thường được |
+| Quadtree | Chia bản đồ thành 4 ô, ô nào quá nhiều điểm thì chia tiếp | Mật độ không đều (phố đông, ngoại ô thưa) |
+| H3 | Lưới lục giác của Uber | Cần khoảng cách tới các ô lân cận đều nhau |
+| Redis GEO | `GEOADD`, `GEOSEARCH`, bên trong là sorted set + geohash | Quy mô vừa, muốn có ngay |
+
+- Geohash độ dài 6 là một ô khoảng 1,2 km × 0,6 km.
+- ⚠️ Hai điểm sát nhau nhưng nằm hai bên ranh giới ô sẽ có prefix khác nhau. Vì vậy phải tìm cả 8
+  ô lân cận, không chỉ ô chứa điểm.
+
+*Ghép chuyến và lưu lộ trình*
+- Shard theo vùng hoặc thành phố.
+- Ghép chuyến phải tránh gán một tài xế cho hai khách: giữ tài xế có TTL, giống giữ ghế ở bài đặt
+  vé (module 2.6).
+- Lộ trình ghi bất đồng bộ qua stream.
+
+*Hỏi tiếp hay gặp*
+- *Surge pricing*: tăng giá khi cầu vượt cung.
+- ETA theo bản đồ đường thật, không theo đường chim bay.
+
+**Đọc**
+- Alex Xu vol 2, ch.1 *Proximity Service* và ch.2 *Nearby Friends*
+- [H3](https://h3geo.org/) (docs, mục introduction)
+- Redis: [GEOSEARCH](https://redis.io/docs/latest/commands/geosearch/)
+
+**Nắm chắc khi**
+- [ ] Giải thích được bằng hình vì sao phải tìm 8 ô lân cận khi dùng geohash
+- [ ] Chọn được geohash hay quadtree cho một app giao đồ ăn một thành phố và bảo vệ lựa chọn
+
+#### 3.7 Distributed job scheduler
+
+**Vì sao cần học:** Mọi app Laravel đều có scheduler và queue. Khi scale từ 1 lên 2 instance, bug
+"cron chạy hai lần" xuất hiện gần như chắc chắn. Bài này kiểm tra bạn hiểu lease, idempotency và
+vì sao exactly-once là ảo tưởng.
+
+**Học gì**
+
+*Yêu cầu*
+- Có cả cron (chạy lặp) và job chạy một lần tại thời điểm T.
+- Hàng triệu job.
+- Không mất job.
+- Không chạy trùng, hoặc chạy trùng cũng vô hại.
+- Retry.
+- Lưu lịch sử.
+
+*Bản cơ bản trên DB*
+- Bảng: `jobs(id, type, payload, run_at, status, attempts, locked_by, locked_until)`.
+- Worker lấy job bằng `FOR UPDATE SKIP LOCKED` (Postgres, MySQL 8.0+): khoá các dòng đang rảnh,
+  bỏ qua dòng worker khác đang khoá, nên nhiều worker không tranh nhau.
+- `locked_until` là một *lease* (quyền giữ có thời hạn). Worker chết giữa chừng thì lease hết hạn
+  và job được worker khác lấy lại.
+
+*Cron chạy trùng*
+- ⚠️ Cron cài trên mọi instance thì job chạy N lần.
+- Cách sửa: chỉ một trigger duy nhất sinh bản chạy vào bảng `jobs`, chọn bằng *leader election*
+  (các instance bầu ra một instance làm việc đó) hoặc bằng lock.
+- Laravel: `onOneServer()` và `withoutOverlapping()`.
+
+*At-least-once và idempotency*
+- Hệ thống kiểu này là at-least-once, nên job phải idempotent.
+- *Exactly-once* (chạy đúng một lần) là ảo tưởng. Chuỗi sự cố:
+  1. Worker làm xong việc, ví dụ đã gửi email.
+  2. Worker chết trước khi kịp ghi trạng thái "xong".
+  3. Lease hết hạn, worker khác chạy lại job. Email đi lần hai.
+
+*Retry và job dài*
+- Retry có backoff, giới hạn số lần. Hết lần thì chuyển `FAILED` và alert.
+- Job chạy lâu:
+  - *Heartbeat*: định kỳ gia hạn lease để không bị lấy mất.
+  - *Checkpoint*: lưu tiến độ để chạy lại thì tiếp từ chỗ dở.
+
+*Quy mô lớn*
+- Partition bảng `jobs` theo thời gian hoặc theo hash.
+- *Timing wheel* hoặc delay queue để kích hoạt job đúng giờ mà không quét bảng.
+- Dùng công cụ có sẵn: Temporal, hoặc Kubernetes CronJob cho việc đơn giản.
+
+*Hỏi tiếp hay gặp*
+- DAG phụ thuộc (job B chỉ chạy khi A xong, kiểu Airflow).
+- Múi giờ và DST (giờ mùa hè làm một giờ bị lặp hoặc bị mất).
+- Chia công bằng giữa các tenant.
+
+**Đọc**
+- Module 2.6 của [03-database-sql.md](03-database-sql.md) (`SKIP LOCKED`), module 3.6 của [14-distributed-systems.md](14-distributed-systems.md) (leader election)
+- Laravel: [Running Tasks on One Server](https://laravel.com/docs/scheduling#running-tasks-on-one-server), [Preventing Task Overlaps](https://laravel.com/docs/scheduling#preventing-task-overlaps)
+
+**Nắm chắc khi**
+- [ ] Viết được query lấy job và luồng xử lý worker chết giữa chừng
+- [ ] Sửa được sự cố "báo cáo gửi hai lần từ khi scale lên 2 instance" bằng hai lớp chặn (câu 26)
+
+#### 3.8 Metrics / logging system
+
+**Vì sao cần học:** Metrics và log là thứ bạn dùng hằng ngày để vận hành, và thiết kế sai (label
+`user_id`, log không lọc thông tin cá nhân) gây tốn tiền hoặc sự cố thật. Bài này kiểm tra bạn hiểu
+workload ghi rất nhiều, bài toán cardinality và đánh đổi chi phí giữa các hệ lưu log.
+
+**Học gì**
+
+*Metrics*
+- Thu thập: agent đẩy lên, hoặc Prometheus định kỳ kéo (*pull*) từ app.
+- Lưu trong *TSDB* (*time series database*), mỗi điểm dữ liệu là `(metric, labels, timestamp,
+  value)`.
+- Đặc điểm: ghi rất nhiều, đọc theo khoảng thời gian.
+- Nén theo thời gian: Gorilla dùng delta-of-delta cho timestamp và XOR cho giá trị, vì các điểm
+  liên tiếp thường rất giống nhau.
+- *Downsampling*: giữ độ phân giải cao cho dữ liệu mới, gộp thô dần cho dữ liệu cũ. Ví dụ 10 giây
+  trong 2 tuần, 5 phút trong 1 năm.
+- ⚠️ *Cardinality*: mỗi tổ hợp giá trị label là một *time series* riêng. Label không giới hạn giá
+  trị như `user_id` hay URL đầy đủ làm số time series bùng nổ.
+  - Ví dụ: thêm label `user_id` cho 1 triệu user thì mỗi metric thành 1 triệu time series.
+
+*Logging*
+- Pipeline, theo từng bước:
+  1. App ghi log ra stdout.
+  2. Agent thu gom: **Grafana Alloy**, Fluent Bit hoặc Vector.
+  3. Buffer: Kafka.
+  4. Xử lý: parse, lọc *PII* (thông tin định danh cá nhân như số điện thoại, email), sampling.
+  5. Lưu để tìm kiếm.
+  6. Chuyển sang object storage để lưu lâu dài.
+- ⚠️ Promtail đã EOL từ 2/3/2026. Grafana khuyên chuyển sang Alloy.
+- Kafka làm buffer để khi hệ lưu trữ chậm thì log không bị mất và app không bị nghẽn.
+- Retention chia nóng, ấm, lạnh: dữ liệu càng cũ càng nằm ở chỗ rẻ hơn và chậm hơn.
+- Chọn nơi lưu:
+
+| | Elasticsearch / OpenSearch | Loki |
+|---|---|---|
+| Index gì | Full-text, mọi nội dung | Chỉ label |
+| Chi phí | Đắt | Rẻ hơn |
+| Query | Nhanh, linh hoạt | Chậm hơn khi tìm trong nội dung |
+
+*Alerting*
+- Rule engine đánh giá các rule định kỳ.
+- Gom nhóm alert liên quan, để một sự cố không bắn 500 alert.
+- Định tuyến tới người trực (*on-call*).
+
+**Đọc**
+- Alex Xu vol 2, ch.5 *Metrics Monitoring and Alerting System*
+- Facebook: [Gorilla: A Fast, Scalable, In-Memory Time Series Database](https://www.vldb.org/pvldb/vol8/p1816-teller.pdf) (mục 4 về nén)
+- Prometheus: [Overview](https://prometheus.io/docs/introduction/overview/), [Do not overuse labels](https://prometheus.io/docs/practices/instrumentation/#do-not-overuse-labels)
+- Grafana: [Loki overview](https://grafana.com/docs/loki/latest/get-started/overview/), [Migrate from Promtail to Alloy](https://grafana.com/docs/alloy/latest/set-up/migrate/from-promtail/)
+- [18-reliability-observability.md](18-reliability-observability.md)
+
+**Nắm chắc khi**
+- [ ] Tính được số time series khi thêm label `user_id` cho 1 triệu user và giải thích vì sao không được
+- [ ] Vẽ được pipeline log từ app Laravel trên Kubernetes tới Loki, chỉ ra chỗ lọc PII
+
+---
+
+## Phần 2: Câu hỏi thường gặp (bonus)
+
+Cách dùng: tự trả lời thành tiếng trước, sau đó mới đối chiếu với hướng trả lời. Với câu
+"Thiết kế X", các ý dưới đây là **điểm then chốt người chấm tìm**, không phải lời giải đầy đủ.
+
+### 🟢 Junior
+
+**1. Scale dọc và scale ngang khác nhau thế nào? Vì sao scale ngang cần stateless?** (1.3)
+- Ý phải có: máy to hơn so với thêm máy; state (session, file, cache local) phải ra ngoài
+- Điểm cộng: Laravel session Redis, file S3; sticky session là cách chữa cháy
+
+**2. 99,9% availability là bao nhiêu phút downtime mỗi tháng?** (1.4)
+- Ý phải có: ~43 phút/tháng, ~8,8 giờ/năm
+- Điểm cộng: nhân availability của chuỗi phụ thuộc
+
+**3. Hệ thống chạy trên một server, traffic tăng 10 lần. Làm gì theo từng bước?** (1.3)
+- Ý phải có: đo trước; tách DB, tối ưu query; cache/CDN; stateless + LB; queue; replica
+- Red flag: "chuyển sang microservices" hoặc "dùng Kubernetes" ngay bước đầu
+
+**4. Vì sao không lưu file upload trên ổ đĩa app server?** (1.3)
+- Ý phải có: không scale ngang được, mất khi server chết; dùng object storage
+- Điểm cộng: pre-signed URL để upload thẳng
+
+**5. 1 triệu request mỗi ngày là bao nhiêu QPS?** (1.2)
+- Ý phải có: ~12 QPS trung bình, dùng 10^5 giây/ngày; peak gấp vài lần
+
+### 🟡 Mid
+
+**6. Thiết kế URL shortener cho 100 triệu URL mới mỗi tháng.** (2.1)
+- Ý phải có: ước lượng dẫn tới cache là trọng tâm; base62 độ dài 7; so các cách sinh mã; unique constraint khi insert
+- Điểm cộng: `301` so với `302` ảnh hưởng thống kê; click event qua queue; cache "không tồn tại"
+- Red flag: không ước lượng mà shard ngay
+
+**7. Thiết kế rate limiter cho API gateway.** (2.2)
+- Ý phải có: chọn thuật toán theo burst và bộ nhớ; counter atomic trong Redis (Lua); `429` + `Retry-After`
+- Điểm cộng: fail-open hay fail-closed; latency thêm vào; multi-region
+- Red flag: `GET` rồi `SET` từ app
+
+**8. Fan-out on write và fan-out on read khác nhau thế nào? Xử lý người nổi tiếng ra sao?** (2.4)
+- Ý phải có: đánh đổi chi phí ghi và đọc; hybrid theo ngưỡng follower
+- Điểm cộng: feed chỉ lưu id; bỏ qua user không hoạt động
+
+**9. Thiết kế notification đa kênh không gửi trùng.** (2.3)
+- Ý phải có: queue theo kênh; idempotency key với unique; retry + DLQ
+- Điểm cộng: queue ưu tiên cho OTP; rate limit theo provider; giờ yên lặng theo timezone
+
+**10. Thiết kế chat 1-1 và nhóm.** (2.5)
+- Ý phải có: WebSocket, session registry, lưu trước rồi ack, thứ tự theo sequence của conversation
+- Điểm cộng: `client_msg_id`; đồng bộ khi reconnect; presence không broadcast; FPM không giữ WebSocket
+- Red flag: sắp tin theo timestamp của client
+
+**11. Thiết kế đặt phòng khách sạn không bị double booking.** (2.6)
+- Ý phải có: conditional update + affected rows, hoặc unique constraint; hold có hạn kiểm tra trong `WHERE`
+- Điểm cộng: nhiều đêm trong một transaction khoá theo thứ tự; thanh toán về muộn; overbooking có chủ đích
+- Red flag: "kiểm tra còn phòng rồi insert"
+
+**12. Thiết kế leaderboard cho game 10 triệu người chơi.** (2.7)
+- Ý phải có: Redis sorted set, `ZINCRBY`, `ZRANGE ... REV`, `ZREVRANK`; DB là nguồn sự thật
+- Điểm cộng: phá hoà bằng thời điểm; key theo kỳ; biết `ZREVRANGE` đã deprecated
+
+**13. Active-passive và active-active khác nhau thế nào?** (1.4)
+- Ý phải có: bản chờ và failover so với cả hai cùng phục vụ; active-active mỗi bản phải chịu toàn tải
+- Điểm cộng: split brain khi promote; xung đột ghi khi active-active nhiều region
+
+**14. Một server PHP-FPM chịu được bao nhiêu request/giây? Cần bao nhiêu server cho 3.000 QPS?** (1.2)
+- Ý phải có: QPS ≈ số worker / latency trung bình; worker bị chặn bởi RAM (RSS mỗi worker) và CPU; số server = peak / (QPS một server × 60–70%) + dự phòng
+- Điểm cộng: tổng worker ≤ `max_connections` của DB; latency tăng khi DB chậm làm QPS mỗi server giảm theo; con số thật lấy từ load test
+- Red flag: "tăng `pm.max_children` lên 500 là được"
+
+### 🔴 Senior
+
+**15. Thiết kế ví điện tử.** (3.1)
+- Ý phải có: ledger bút toán kép append-only; idempotency ở mọi tầng; timeout PSP không phải thất bại; reconciliation
+- Điểm cộng: hot account; webhook idempotent sai thứ tự; tiền không dùng float
+- Red flag: chỉ có một cột `balance` và `UPDATE`
+
+**16. Thiết kế flash sale 1.000 sản phẩm cho 1 triệu người.** (3.2)
+- Ý phải có: từ chối rẻ ở nhiều tầng; trừ nguyên tử trong Redis; queue tạo đơn; DB chốt chặn cuối
+- Điểm cộng: cô lập hạ tầng; scale trước; chia bucket hot key; đối soát Redis và DB
+
+**17. Snowflake ID gồm những phần nào? Đồng hồ chạy lùi thì sao?** (3.3)
+- Ý phải có: 41 bit ms, 10 bit machine, 12 bit sequence; phát hiện lùi và chờ hoặc từ chối
+- Điểm cộng: cấp machine id cho pod; UUIDv7 khi không cần 64 bit
+
+**18. Thiết kế key-value store phân tán.** (3.3)
+- Ý phải có: consistent hashing + vnode; replication N; quorum; xử lý xung đột; hinted handoff, anti-entropy; LSM
+- Điểm cộng: `W + R > N` vẫn không linearizable; bloom filter trong đường đọc
+
+**19. Thiết kế Dropbox.** (3.5)
+- Ý phải có: tách block và metadata; chunking + dedup theo hash; pre-signed URL; sync bằng con trỏ phiên bản; bản xung đột
+- Điểm cộng: content-defined chunking; rủi ro dedup chéo user; GC block
+
+**20. Tìm tài xế gần nhất: geohash hay quadtree?** (3.6)
+- Ý phải có: 250.000 ghi/giây giữ trong bộ nhớ; geohash cần 8 ô lân cận; quadtree hợp mật độ lệch
+- Điểm cộng: H3; Redis GEO cho quy mô vừa; giữ tài xế có TTL khi ghép chuyến
+
+**21. Tình huống: giữa bài URL shortener, người phỏng vấn nói "traffic đọc tăng 100 lần".** (2.1, 1.2)
+- Ý phải có: ước lượng lại; cache hit rate và dung lượng; CDN cache redirect
+- Điểm cộng: hot key → cache in-process trước Redis; thundering herd khi cache chết ([11-cache.md](11-cache.md))
+
+**22. Tình huống: người phỏng vấn nói "Thiết kế Instagram" rồi im lặng.** (1.1)
+- Ý phải có: chốt phạm vi (đăng ảnh, follow, feed), hỏi DAU và tỉ lệ đọc/ghi, nói thành tiếng giả định
+- Điểm cộng: chọn deep dive vào feed (fan-out) và lưu ảnh (object storage + CDN)
+- Red flag: bắt đầu vẽ ngay story, DM, search
+
+**23. Tình huống: bài ví điện tử, "gọi PSP bị timeout, giờ làm gì?"** (3.1)
+- Ý phải có: trạng thái `UNKNOWN`, không tạo giao dịch mới; query với cùng mã giao dịch; chờ webhook
+- Điểm cộng: job quét `PENDING`/`UNKNOWN` quá lâu; reconciliation cuối ngày; không cộng/trừ tiền khi chưa chắc
+
+**24. Tình huống: sau flash sale, phát hiện bán 1.012 trên 1.000 sản phẩm.** (3.2)
+- Ý phải có: tìm check-then-act, trừ kho không nguyên tử, retry tạo đơn trùng
+- Điểm cộng: DB chốt chặn cuối; idempotency khi tạo đơn; liên hệ khách, hoàn tiền, postmortem
+
+**25. Tình huống: một chat server chết, 50.000 kết nối rớt cùng lúc.** (2.5)
+- Ý phải có: reconnect có backoff + jitter; tin không mất vì lưu trước khi ack; đồng bộ theo `last_seen_message_id`
+- Điểm cộng: session registry hết hạn; tin trong lúc đó đi đường push
+
+**26. Tình huống: job gửi báo cáo chạy hai lần mỗi sáng từ khi scale lên 2 instance.** (3.7)
+- Ý phải có: cron chạy trên mọi instance; `onOneServer()`/lock/leader election hoặc tách scheduler ra một process
+- Điểm cộng: làm job idempotent (ghi dấu "đã gửi báo cáo ngày X") để trùng cũng vô hại
+
+**27. Cần 99,99%. Bạn thay đổi gì?** (1.4)
+- Ý phải có: 52 phút/năm nên failover phải tự động; tính availability chuỗi phụ thuộc; multi-AZ
+- Điểm cộng: deploy an toàn (canary) vì phần lớn sự cố đến từ thay đổi; static stability
+- Red flag: "thêm server"
+
+**28. Chọn SQL hay NoSQL cho dự án mới?** (1.3)
+- Ý phải có: bắt đầu từ pattern truy cập và yêu cầu consistency; SQL là mặc định tới khi có lý do cụ thể
+- Red flag: "NoSQL vì scale" mà không nói quy mô
+
+---
 
 ## Bài tập tự làm
 
-1. Tự làm bài URL shortener trong 45 phút theo đúng các bước và phân bổ thời gian, ghi ra giấy, sau đó tự chấm theo mục "Người chấm đánh giá gì".
-2. Ước lượng cho một ứng dụng chat 20 triệu DAU: QPS gửi tin, storage mỗi năm, số kết nối WebSocket đồng thời, số chat server cần nếu mỗi server giữ được một số kết nối bạn tự giả định.
-3. Viết Lua script token bucket cho Redis (tham số: capacity, refill rate), kèm giải thích vì sao phải chạy nguyên tử.
-4. Thiết kế schema ledger cho ví điện tử hỗ trợ nạp, chuyển, refund; viết câu SQL kiểm tra ledger cân bằng.
-5. Thiết kế hệ thống đặt vé xem phim cho một buổi mở bán 50.000 người: vẽ sơ đồ, viết câu UPDATE giữ ghế, mô tả xử lý thanh toán về muộn.
+1. **Tự chấm một bài.** Làm bài URL shortener trong 45 phút theo đúng bảy bước ở module 1.1,
+   ghi ra giấy, sau đó tự chấm theo mục "Người chấm đánh giá".
+2. **Ước lượng chat.** Ứng dụng chat 20 triệu DAU: QPS gửi tin, storage mỗi năm, số kết nối
+   WebSocket đồng thời, số chat server cần nếu mỗi server giữ được một số kết nối bạn tự giả định.
+3. **Token bucket.** Viết Lua script token bucket cho Redis (tham số: capacity, refill rate),
+   kèm giải thích vì sao phải chạy nguyên tử.
+4. **Ledger.** Thiết kế schema ledger cho ví điện tử hỗ trợ nạp, chuyển, refund; viết câu SQL
+   kiểm tra ledger cân bằng.
+5. **Đặt vé.** Thiết kế hệ thống đặt vé xem phim cho một buổi mở bán 50.000 người: vẽ sơ đồ,
+   viết câu UPDATE giữ ghế, mô tả xử lý thanh toán về muộn.
+6. **Sizing PHP-FPM.** Với app Laravel bạn đang làm (hoặc tự giả định): đo RSS trung bình mỗi
+   worker và latency p50/p95, tính `pm.max_children` cho máy 8 GB RAM 4 core, số server cho
+   peak 2.000 QPS, và tổng connection tới MySQL. Nêu rõ giả định nào ảnh hưởng kết quả nhiều nhất.
 
 > Nộp bài vào đây để được review.
