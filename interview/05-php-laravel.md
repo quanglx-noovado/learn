@@ -1,6 +1,6 @@
 # 05. PHP và Laravel
 
-> [← Mục lục](README.md) · Trọng tâm: **PHP 8.4–8.5** (runtime Zend Engine, OPcache, PHP-FPM, GC), Composer/PSR, **Laravel 12–13** từ lifecycle tới queue/Octane, chất lượng code, hiệu năng, bảo mật đặc thù PHP.
+> [← Mục lục](README.md) · **[📖 Bài đọc kiến thức](kien-thuc/05-php-laravel.md)** · Trọng tâm: **PHP 8.4–8.5** (runtime Zend Engine, OPcache, PHP-FPM, GC), Composer/PSR, **Laravel 12–13** từ lifecycle tới queue/Octane, chất lượng code, hiệu năng, bảo mật đặc thù PHP.
 > Ký hiệu: 🟢 junior · 🟡 mid · 🔴 senior · ⚠️ cạm bẫy hay bị hỏi vặn.
 
 Nếu PHP/Laravel là ngôn ngữ chính trong CV, đây là file bị đào sâu nhất. Trả lời hời hợt ở
@@ -171,13 +171,13 @@ phỏng vấn đào xuống copy-on-write và refcount ở module 3.1.
   kiểu dùng được cho cả hai vai:
   - *List*: key là 0, 1, 2... liên tục, như `['a', 'b', 'c']`.
   - *Map*: key tuỳ ý, như `['name' => 'An', 'age' => 30]`.
-- *Packed array*: khi key là 0..n liên tục và tăng dần, PHP lưu gọn như mảng thường, bỏ hẳn phần
+- *Packed array*: khi key là số nguyên tăng dần (thường là 0..n), PHP lưu gọn như mảng thường, bỏ hẳn phần
   hash. Tiết kiệm RAM và nhanh hơn (chi tiết ở 3.1).
 - ⚠️ Key bị ép kiểu khi ghi vào array:
   - `"1"` thành `1` (chuỗi số nguyên dạng chuẩn thành int).
   - `true` thành `1`, `false` thành `0`.
   - `null` thành `""`.
-  - Float bị cắt phần thập phân, `1.7` thành `1`. Dùng float làm key bị deprecated từ 8.1.
+  - Float bị cắt phần thập phân, `1.7` thành `1`. Từ 8.1, dùng float **có phần thập phân** làm key (ví dụ `1.7`) bị deprecated; float nguyên như `1.0` thì không.
   - `"01"` **vẫn là string**, vì nó không phải dạng chuẩn của số 1.
   - Hệ quả: `['1' => 'a', 1 => 'b', true => 'c']` chỉ có **một** phần tử `[1 => 'c']`.
 
@@ -273,7 +273,8 @@ không trả lời được câu "`User::where()` gọi được dù `where` kh�
   }
   ```
 - Trait khai báo được abstract method (bắt class dùng nó phải viết). Static property trong trait
-  là **riêng cho mỗi class** dùng trait, không dùng chung. Từ 8.2 trait có hằng.
+  là **riêng cho mỗi class** dùng trait. ⚠️ Trước 8.3, nếu class cha và class con cùng `use` một
+  trait thì hai class vẫn dùng chung static property đó; từ 8.3 mới tách riêng. Từ 8.2 trait có hằng.
 - ⚠️ Trait không phải type: không `instanceof Trait` được, không type hint bằng trait được.
 - ⚠️ Lạm dụng trait là một dạng kế thừa ngầm: method từ đâu tới, property nào đè property nào rất
   khó lần. Nếu cần "có khả năng X" thì interface + composition (inject object làm việc X) thường
@@ -385,7 +386,8 @@ và nhờ đó biết bạn có hiểu cây `Throwable` của PHP 7+ không.
 - Warning và notice (ví dụ đọc key không tồn tại) **không** phải exception. PHP in cảnh báo rồi
   chạy tiếp.
   - Chỉ khi có *error handler* (hàm đăng ký qua `set_error_handler`) đổi chúng thành exception thì
-    mới bắt được. Laravel làm việc này ở môi trường dev.
+    mới bắt được. Laravel làm việc này ở **mọi môi trường** (class `HandleExceptions`): warning và
+    notice thành `ErrorException`, còn deprecation thì chỉ ghi log.
 - PHP 8.5: fatal error (loại vẫn không bắt được, ví dụ hết bộ nhớ) có kèm *backtrace*, tức danh
   sách các hàm đang gọi dở, giúp tìm chỗ gây lỗi.
 
@@ -826,10 +828,12 @@ reload FPM, vì sao `env()` trả `null`.
    request.
 3. `php artisan migrate --force` (`--force` vì production mặc định hỏi xác nhận).
 4. Reload FPM để xoá OPcache.
-5. `php artisan queue:restart` để queue worker nạp code mới.
+5. `php artisan queue:restart` để queue worker nạp code mới. Laravel 13 có `php artisan reload`
+   gộp sẵn `queue:restart`, `schedule:interrupt` và lệnh reload của các package.
 
 - ⚠️ Sau `config:cache`, file `.env` không được đọc nữa. `env()` gọi ở bất kỳ đâu ngoài
-  `config/*.php` sẽ trả `null`.
+  `config/*.php` sẽ trả `null` với biến chỉ khai báo trong `.env` (biến môi trường thật của hệ
+  thống vẫn đọc được, nên lỗi có thể chỉ xuất hiện ở một số môi trường).
   - Quy tắc: chỉ gọi `env()` trong file config, còn code dùng `config('app.x')`.
 - ⚠️ Queue worker, Horizon, Octane là *process sống lâu*: nạp code một lần rồi chạy mãi. Không
   restart chúng thì vẫn chạy **code cũ**, dù FPM đã có code mới.
@@ -1151,7 +1155,8 @@ ai biết, worker chạy code cũ. Người phỏng vấn rất hay hỏi quan h
 - *Job middleware* bọc quanh job, giống middleware HTTP:
   - `RateLimited`: giới hạn tần suất.
   - `WithoutOverlapping`: không cho hai job cùng key chạy đồng thời. `releaseAfter` (đẩy lại sau
-    N giây), `expireAfter` (lock tự hết hạn).
+    N giây), `expireAfter` (lock tự hết hạn). ⚠️ Mặc định lock **không bao giờ hết hạn**: worker bị kill giữa
+    chừng thì lock treo mãi, nên luôn đặt `expireAfter`.
   - `ThrottlesExceptions`: gặp lỗi liên tiếp thì tạm hoãn.
   - `Skip`: bỏ qua job theo điều kiện.
 - ⚠️ Job bị `release()` (đẩy lại hàng đợi, ví dụ do rate limit) vẫn tính là một **attempt**. `tries`
@@ -1185,7 +1190,7 @@ ai biết, worker chạy code cũ. Người phỏng vấn rất hay hỏi quan h
 - Laravel: [Horizon](https://laravel.com/docs/horizon) (mục [Balancing Strategies](https://laravel.com/docs/horizon#balancing-strategies), [Deploying Horizon](https://laravel.com/docs/horizon#deploying-horizon))
 
 **Nắm chắc khi**
-- [ ] Giải thích được từng bước vì sao job 120 giây với `retry_after = 90` bị chạy hai lần
+- [ ] Giải thích được từng bước vì sao job 120 giây với `retry_after = 90` bị chạy ít nhất hai lần
 - [ ] Thiết kế được job gọi API bị giới hạn 60 request/phút, idempotent, không chạy trùng theo `order_id` (bài tập 4)
 - [ ] Viết được cấu hình supervisor cho worker và giải thích `stopwaitsecs`
 
@@ -1219,8 +1224,8 @@ Người phỏng vấn thường hỏi theo kiểu tình huống "sau khi thêm 
   DB. ⚠️ `remember` thường **không** chống được ([11-cache.md](11-cache.md)).
   - `Cache::flexible($key, [fresh, stale], fn)`: *stale-while-revalidate*. Trong khoảng `fresh` trả
     bản cache. Trong khoảng `stale` vẫn trả bản cũ ngay, và tính lại **sau khi gửi response**.
-- Laravel 13: `Cache::touch()` gia hạn TTL không cần đọc lại giá trị. `Cache::memo()` nhớ kết quả
-  trong phạm vi một request, khỏi gọi Redis lặp lại.
+- `Cache::memo()` (từ Laravel 12) nhớ kết quả trong phạm vi một request, khỏi gọi Redis lặp lại.
+  Laravel 13 thêm `Cache::touch()` gia hạn TTL không cần đọc lại giá trị.
 
 *Session và rate limiting*
 - Driver session: `file`, `database`, `redis`.
@@ -1253,7 +1258,7 @@ Người phỏng vấn thường hỏi theo kiểu tình huống "sau khi thêm 
   (chạy trước mọi kiểm tra, ví dụ cho super admin qua hết).
 - Lý thuyết JWT/session/OAuth: [10-security.md](10-security.md).
 
-*Tiện ích mới từ Laravel 11*
+*Tiện ích nên biết (nhiều cái có từ trước Laravel 11)*
 
 | Công cụ | Làm gì | Cạm bẫy |
 |---|---|---|
@@ -1381,7 +1386,7 @@ process sống lâu (3.5).
   $b = $a;                                  // chỉ tăng refcount
   echo memory_get_usage() - $m1, "\n";      // gần 0
   $b[] = 1;                                 // ghi: separation, copy cả array
-  echo memory_get_usage() - $m1, "\n";      // tăng cỡ vài chục MB
+  echo memory_get_usage() - $m1, "\n";      // tăng khoảng 16 MiB (từ 8.2 mỗi phần tử packed array tốn 16 byte)
   ```
 - `foreach ($arr as $v)` (by value) cũng không copy array, chỉ tăng refcount trong lúc duyệt.
 
@@ -1416,7 +1421,7 @@ process sống lâu (3.5).
 - Hệ quả:
   - `foreach` chỉ cần đi dọc mảng bucket, nên vừa giữ thứ tự chèn vừa nhanh (dữ liệu liền nhau, CPU
     cache hiệu quả).
-  - *Packed array* (key 0..n liên tục) bỏ hẳn mảng hash, key chính là vị trí. Tiết kiệm thêm RAM.
+  - *Packed array* (key số nguyên tăng dần, thường là 0..n) bỏ hẳn mảng hash, key chính là vị trí. Tiết kiệm thêm RAM.
 - So với PHP 5 (mỗi phần tử là một zval cấp phát riêng, nối bằng danh sách liên kết), PHP 7 dùng ít
   RAM hơn hẳn cho cùng một array và nhanh hơn.
 
@@ -1476,7 +1481,8 @@ dọn vòng tham chiếu thế nào, so với GC của Java/Go".
 - PHP có thêm một bộ *cycle collector* để dọn riêng các vòng:
   1. Mỗi khi refcount của một array hoặc object **giảm nhưng chưa về 0**, giá trị đó có thể là một
      phần của vòng, nên được ghi vào *root buffer* (danh sách nghi vấn).
-  2. Khi root buffer đầy (**10.000 root**), thuật toán chạy.
+  2. Khi root buffer đầy (ngưỡng ban đầu **10.000 root**; từ 7.3 ngưỡng tự nới ra nếu lần chạy trước
+     thu hồi được ít), thuật toán chạy.
   3. Với mỗi root, PHP thử trừ refcount của mọi thứ nó trỏ tới (mô phỏng "nếu bỏ các liên kết nội
      bộ thì sao").
   4. Giá trị nào refcount mô phỏng về 0 thì chỉ được giữ sống bởi chính vòng đó, tức là rác.
@@ -1551,7 +1557,8 @@ vận hành khi deploy mà nhiều người không để ý.
 - *Preloading* (7.4+): khai báo `opcache.preload` trỏ tới một script. Khi FPM khởi động, script
   này nạp sẵn các class vào shared memory, và mọi request thấy chúng như class có sẵn của PHP, không
   cần autoload.
-- Cần `opcache.preload_user` (user hệ điều hành chạy script preload).
+- Khi chạy FPM bằng root thì phải đặt `opcache.preload_user` (user hệ điều hành chạy script
+  preload), vì PHP không cho preload chạy dưới root.
 - Đánh giá:
   - Lợi ít với app đã có autoload tối ưu và OPcache tốt, vì phần tiết kiệm là rất nhỏ.
   - ⚠️ Đổi code của class đã preload thì phải **restart FPM**, reload thường không đủ.
@@ -1627,7 +1634,8 @@ phỏng vấn senior thường đưa một tình huống sự cố và hỏi b�
 *Đọc status page theo thời gian*
 - Nhìn một lần thì ít giá trị, cần nhìn theo thời gian (đưa vào dashboard):
   - `listen queue` > 0 kéo dài: request đang phải xếp hàng chờ worker.
-  - `max children reached` tăng: đã chạm trần số worker.
+  - `max children reached` tăng: đã chạm trần số worker. ⚠️ Chỉ số này chỉ có ý nghĩa với
+    `pm = dynamic` và `ondemand`; với `pm = static` nó luôn bằng 0.
 - Hai dấu hiệu trên có nghĩa là thiếu worker, **hoặc** worker đang bị chặn chờ downstream (DB, API
   ngoài) nên không rảnh để nhận request.
 
@@ -1786,7 +1794,8 @@ vấn muốn nghe quy trình đo trước sửa sau, biết chọn công cụ n�
   function rows(string $path): \Generator {
       $h = fopen($path, 'rb');
       try {
-          while (($row = fgetcsv($h)) !== false) { yield $row; }
+          // PHP 8.4+: truyền rõ $escape, không thì bị deprecation
+          while (($row = fgetcsv($h, null, ',', '"', '')) !== false) { yield $row; }
       } finally { fclose($h); }
   }
   ```
@@ -1885,7 +1894,7 @@ thường hỏi "vì sao `unserialize` dữ liệu người dùng nguy hiểm" h
   Không dùng `rand()`, `mt_rand()`, `uniqid()`, vì chúng đoán được.
 
 *Những chỗ khác cần nhớ*
-- `APP_DEBUG=true` hoặc `display_errors=On` trên production: trang lỗi lộ biến môi trường, secret.
+- `APP_DEBUG=true` hoặc `display_errors=On` trên production: trang lỗi lộ stack trace, giá trị cấu hình nhạy cảm và secret.
 - Blade `{!! $x !!}` không escape HTML, dễ thành XSS. `{{ $x }}` thì có escape.
 - `extract()`, biến biến `$$var`, `eval`: biến input thành biến hoặc code.
 - `shell_exec` với input: dùng `escapeshellarg`, hoặc `Process` với tham số dạng mảng.
@@ -2044,7 +2053,7 @@ Cách dùng: tự trả lời thành tiếng trước, sau đó mới đối chi
 
 **17. Scheduler gửi báo cáo 3 lần mỗi sáng sau khi scale lên 3 server.** (2.7)
 - Ý phải có: mỗi server chạy cron riêng; `onOneServer()` với cache lock dùng chung, hoặc scheduler chạy trên một instance riêng
-- Điểm cộng: job gửi idempotent (ghi đã gửi ngày nào); `withoutOverlapping` hết hạn 24 giờ khi process chết
+- Điểm cộng: job gửi idempotent (ghi đã gửi ngày nào); `withoutOverlapping` của scheduler hết hạn 24 giờ khi process chết (còn job middleware `WithoutOverlapping` mặc định không hết hạn)
 
 **18. Bạn đưa PHPStan vào một codebase Laravel cũ thế nào?** (2.8)
 - Ý phải có: Larastan, bắt đầu level thấp hoặc baseline, CI chặn lỗi mới, nâng level dần

@@ -1,6 +1,6 @@
 # 09. Thiết kế API
 
-> [← Mục lục](README.md) · Trọng tâm: **REST/HTTP trên Laravel** (API Resources, FormRequest, Sanctum, rate limiting), đối chiếu GraphQL, gRPC.
+> [← Mục lục](README.md) · **[📖 Bài đọc kiến thức](kien-thuc/09-api-design.md)** · Trọng tâm: **REST/HTTP trên Laravel** (API Resources, FormRequest, Sanctum, rate limiting), đối chiếu GraphQL, gRPC.
 > Ký hiệu: 🟢 junior · 🟡 mid · 🔴 senior · ⚠️ cạm bẫy hay bị hỏi vặn.
 
 File gồm hai phần:
@@ -200,8 +200,8 @@ client retry một request không nên retry. Người phỏng vấn thích hỏ
 - `413 Content Too Large`: body quá lớn.
 - `422 Unprocessable Content`: JSON đúng định dạng nhưng sai nghiệp vụ, ví dụ email không hợp lệ.
   Laravel trả `422` cho lỗi validation.
-- `429 Too Many Requests`: gọi quá nhiều, bị rate limit. Kèm header `Retry-After` nói bao lâu nữa
-  mới gọi lại được.
+- `429 Too Many Requests`: gọi quá nhiều, bị rate limit. Có thể kèm header `Retry-After` nói bao
+  lâu nữa mới gọi lại được (RFC 6585 chỉ ghi MAY, không bắt buộc).
 
 *5xx: lỗi phía server*
 - `500 Internal Server Error`: lỗi chưa xử lý trong code, ví dụ exception không ai bắt.
@@ -229,6 +229,8 @@ client retry một request không nên retry. Người phỏng vấn thích hỏ
 *Client nên retry code nào*
 - Retry được: `408` (request timeout), `429`, `502`, `503`, `504`, và lỗi mạng. Đây là lỗi tạm
   thời, thử lại sau có thể thành công.
+  - Với POST, retry `502`/`504` chỉ an toàn khi có idempotency key (module 2.1): upstream có thể đã
+    xử lý xong.
 - Không retry mù: `400`, `401`, `403`, `404`, `422`. Gửi lại y nguyên vẫn sai.
 - `500` chỉ retry khi request là idempotent.
   - Lý do: với `POST /payments`, server có thể đã trừ tiền xong rồi mới lỗi ở bước sau. Retry là
@@ -306,7 +308,7 @@ Ví dụ một response lỗi theo RFC 9457:
 - Laravel: [Rendering Exceptions](https://laravel.com/docs/errors#rendering-exceptions)
 
 **Nắm chắc khi**
-- [ ] Viết được handler trong Laravel biến `ValidationException`, `ModelNotFoundException`, `AuthorizationException` thành problem+json
+- [ ] Viết được handler trong Laravel biến `ValidationException`, `ModelNotFoundException`, `AuthorizationException` thành problem+json, và giải thích được vì sao closure type-hint `ModelNotFoundException`/`AuthorizationException` không được gọi (Laravel đã đổi chúng thành `NotFoundHttpException`/`AccessDeniedHttpException`; phải type-hint `HttpExceptionInterface` rồi xem `getPrevious()`)
 - [ ] Giải thích được vì sao client không nên `if (message == "...")`
 
 #### 1.4 Filtering, sorting, pagination
@@ -419,7 +421,7 @@ POST không idempotent (module 1.1), nên cần một cơ chế để biến nó
 
 | Bản ghi cũ | Trả về | Lý do |
 |---|---|---|
-| Hash body khác | `422` | Client dùng lại key cho một request khác, là bug phía client |
+| Hash body khác | `422` (draft IETF; Brandur dùng `409`) | Client dùng lại key cho một request khác, là bug phía client |
 | Đang `processing` | `409` | Request đầu chưa xong, không được xử lý lần hai |
 | Đã `completed` | Đúng response đã lưu | Client chỉ cần kết quả của lần đầu |
 
@@ -440,7 +442,10 @@ POST không idempotent (module 1.1), nên cần một cơ chế để biến nó
 
 *Lưu bao lâu*
 - *TTL* (thời gian sống) phải đủ phủ mọi lần retry hợp lý. Stripe giữ key ít nhất 24 giờ.
-- Thường không lưu response lỗi `5xx`, để client retry được và có cơ hội thành công.
+- Với response lỗi `5xx` có hai trường phái:
+  - Stripe lưu cả `500`, coi kết quả là không xác định: client không retry bằng key mới mà đối soát.
+  - Brandur không lưu, mở lại key để client retry. Chỉ làm được khi logic bên trong an toàn khi
+    chạy lại (recovery point).
 
 *Các lớp phòng thủ khác*
 - Lớp thứ hai: ràng buộc nghiệp vụ tự nhiên, ví dụ unique `order_id` trong bảng `payments`. Kể cả
@@ -502,8 +507,8 @@ cùng sửa, một người mất thay đổi" và "thiết kế API cho thao t�
 - Luôn giới hạn số item mỗi request.
 - Phải chọn và ghi rõ trong tài liệu một trong hai kiểu:
   - *Atomic*: tất cả thành công hoặc không item nào được tạo.
-  - *Partial success*: item nào thành công thì giữ, trả kết quả của từng item. Status là `200`
-    hoặc `207 Multi-Status`.
+  - *Partial success*: item nào thành công thì giữ, trả kết quả của từng item. Zalando bắt buộc
+    `207 Multi-Status` (không dùng `200`); có API khác trả `200` kèm kết quả từng item.
 - ⚠️ Bulk lớn thì không xử lý đồng bộ trong request, mà chuyển sang long-running operation ngay
   dưới đây.
 
@@ -609,6 +614,8 @@ lỗi CORS"), và cũng là chủ đề hay bị hiểu nhầm là cơ chế b�
 - ⚠️ Không dùng `Access-Control-Allow-Origin: *` cùng credentials. Trình duyệt từ chối tổ hợp này.
 - ⚠️ Phản chiếu nguyên giá trị `Origin` của request vào `Allow-Origin` kèm credentials là **lỗ hổng**:
   bất kỳ trang độc nào cũng đọc được dữ liệu của user đang đăng nhập. Phải so với whitelist.
+  - Laravel: `allowed_origins => ['*']` cùng `supports_credentials => true` trong `config/cors.php`
+    thì package tự phản chiếu `Origin`, tức rơi đúng vào lỗ hổng này.
 - Khi `Allow-Origin` thay đổi theo request, thêm `Vary: Origin` để cache không trả nhầm header
   cho origin khác.
 - ⚠️ Preflight bị `401` vì middleware auth chặn cả `OPTIONS` là lỗi rất hay gặp. Request `OPTIONS`
@@ -649,7 +656,8 @@ webhook" rất hay gặp ở mức mid.
 - Payload có hai kiểu:
   - Đầy đủ: có `event_id` duy nhất, `type` (ví dụ `order.paid`), `created_at`, và dữ liệu.
   - *Thin event*: chỉ có id, bên nhận tự gọi API để lấy bản mới nhất. Tránh được lỗi dữ liệu cũ.
-- Đặt timeout ngắn cho mỗi lần gửi, để một bên nhận chậm không làm nghẽn cả worker.
+- Đặt timeout ngắn cho mỗi lần gửi (Standard Webhooks gợi ý 15–30 giây), để một bên nhận chậm
+  không làm nghẽn cả worker.
 
 *Bên gửi: retry*
 - Retry khi không nhận được `2xx`.
@@ -727,7 +735,7 @@ nào" là câu thiết kế thực tế rất hay gặp.
 - Chỉ retry khi lỗi là tạm thời (module 1.2) **và** thao tác là idempotent.
 - Dùng exponential backoff cộng jitter (module 2.4).
 - Giới hạn cả số lần retry và tổng thời gian.
-  - Ví dụ: timeout 5 giây, retry 3 lần, backoff 1 và 2 giây thì request có thể treo tới
+  - Ví dụ: timeout 5 giây, tổng 3 lần thử, backoff 1 và 2 giây thì request có thể treo tới
     5 × 3 + 1 + 2 = 18 giây.
 - Nếu bên kia hỗ trợ idempotency key (module 2.1) thì gửi kèm, để retry POST cũng an toàn.
 
@@ -755,6 +763,8 @@ nào" là câu thiết kế thực tế rất hay gặp.
 
 *Đối chiếu Java/Go*
 - Laravel: `Http::timeout()->connectTimeout()->retry()`. Với Guzzle thuần thì dùng middleware.
+  - ⚠️ `Http::retry(3)` là tổng 3 lần thử, không phải 3 lần retry. Không truyền closure điều kiện
+    thì retry cả `4xx`.
 - Java: thư viện Resilience4j (circuit breaker, retry, bulkhead).
 - Go: `context.WithTimeout` để đặt hạn, và thư viện `sony/gobreaker` cho circuit breaker.
 
@@ -822,7 +832,8 @@ production thật.
   RateLimiter::for('api', fn ($r) => Limit::perMinute(60)->by($r->user()?->id ?: $r->ip()));
   ```
 
-  rồi gắn middleware `throttle:api` cho route. Ví dụ trên đếm theo user nếu đã đăng nhập, theo IP
+  rồi gắn middleware `throttle:api` cho route (từ Laravel 11, group `api` không có sẵn
+  `throttle`). Ví dụ trên đếm theo user nếu đã đăng nhập, theo IP
   nếu chưa.
 - Vượt giới hạn thì Laravel trả `429` kèm `Retry-After` và các header `X-RateLimit-*`.
 - ⚠️ Bộ đếm nằm trong cache. Có nhiều server mà cache driver là `file` hoặc `array` thì mỗi server
@@ -893,8 +904,8 @@ ID int64 dạng số" hay gặp ở mức mid.
     chỉ dùng có chủ đích).
 - Dùng cờ `JSON_THROW_ON_ERROR` để lỗi encode/decode ném exception, thay vì âm thầm trả `false`
   hoặc `null`.
-- `json_decode` với cờ `JSON_BIGINT_AS_STRING` để số quá lớn được giữ dạng string thay vì thành
-  float bị mất chính xác.
+- `json_decode` với cờ `JSON_BIGINT_AS_STRING` để số vượt `PHP_INT_MAX` được giữ dạng string thay
+  vì thành float bị mất chính xác. Số trong phạm vi int64 vẫn đọc ra int.
 
 *Các format khác JSON*
 
@@ -945,7 +956,7 @@ một field mobile đang dùng thì làm thế nào" rất hay gặp.
 | Cách | Ví dụ | Ưu | Nhược |
 |---|---|---|---|
 | Version trong URL | `/v1/orders` | Rõ ràng, dễ route, dễ cache | URL đổi khi lên version |
-| Header theo ngày (kiểu Stripe) | `Stripe-Version: 2026-09-01` | URL sạch, mỗi client ghim một ngày | Phải khai `Vary` cho cache, khó thấy khi debug |
+| Header theo ngày (kiểu Stripe) | `Stripe-Version: 2026-08-26.dahlia` | URL sạch, mỗi client ghim một ngày | Phải khai `Vary` cho cache, khó thấy khi debug |
 | Media type | `Accept: application/vnd.acme.v2+json` | Đúng tinh thần content negotiation (module 2.2) | Ít người quen, khó thử nhanh bằng trình duyệt |
 
 - Mục tiêu thật sự là **ít phải tăng version**: thiết kế sao cho phần lớn thay đổi không breaking.
@@ -1045,6 +1056,8 @@ hoại. Người phỏng vấn thường hỏi "GraphQL gặp N+1 thế nào" v�
 - ⚠️ GraphQL thường trả HTTP `200` kể cả khi có lỗi, kèm mảng `errors` trong body. Có thể kèm cả
   `data` một phần (field nào lấy được thì vẫn trả).
 - Hệ quả: monitoring đếm lỗi theo status code sẽ không thấy lỗi. Phải đọc mảng `errors`.
+- Spec GraphQL over HTTP (còn là draft) với media type `application/graphql-response+json`: có
+  `data` khác `null` thì trả `2xx`; request lỗi từ đầu (parse, validation) thì trả `4xx`.
 
 *N+1 và DataLoader*
 - *Resolver* là hàm lấy dữ liệu cho một field. Query ở trên có resolver `customer` chạy **cho mỗi
@@ -1075,9 +1088,11 @@ hoại. Người phỏng vấn thường hỏi "GraphQL gặp N+1 thế nào" v�
   - Cache ở DataLoader.
   - Persisted queries qua `GET` (ngay dưới).
 - *Persisted queries*:
-  - Query được đăng ký trước trên server. Client chỉ gửi hash của query thay vì cả query.
-  - Server chỉ chạy những query đã đăng ký, nên chặn được query tuỳ ý.
-  - Gửi được qua `GET`, nên CDN cache được.
+  - Client chỉ gửi hash của query thay vì cả query. Gửi được qua `GET`, nên CDN cache được.
+  - *Trusted documents*: query được đăng ký trước lúc build, server chỉ chạy những query đã đăng
+    ký, nên chặn được query tuỳ ý.
+  - ⚠️ *APQ* (Automatic Persisted Queries) cho client tự đăng ký query lúc chạy, nên chỉ để cache,
+    không chặn được query tuỳ ý.
 
 *Trong PHP*
 - *Lighthouse*: thư viện GraphQL cho Laravel, kiểu *schema-first* (viết schema trước, gắn resolver
@@ -1134,7 +1149,8 @@ client cũ" là câu senior kinh điển.
 *Deadline và status code*
 - *Deadline* là thời điểm mà sau đó client không cần kết quả nữa. Client đặt deadline.
 - Deadline được **lan truyền** qua các service: A gọi B với deadline còn 2 giây, B gọi C thì C chỉ
-  còn phần thời gian còn lại. Trong Go, deadline đi theo `context`.
+  còn phần thời gian còn lại. Java và Go tự lan truyền (trong Go, deadline đi theo `context`);
+  C++ phải bật.
 - Hết hạn thì nhận status `DEADLINE_EXCEEDED`.
 - Server nên kiểm tra context để dừng việc vô ích khi client đã bỏ cuộc.
 - gRPC có bộ status code riêng, không dùng status HTTP: `INVALID_ARGUMENT`, `NOT_FOUND`,
@@ -1214,8 +1230,8 @@ gateway, BFF, tracing.
 - *OpenAPI* là chuẩn viết contract cho REST API bằng YAML hoặc JSON: có những endpoint nào, tham
   số gì, body và response có schema thế nào.
 - Bản 3.1:
-  - Khớp hoàn toàn với *JSON Schema* 2020-12 (chuẩn mô tả hình dạng dữ liệu JSON), nên dùng lại
-    được tooling của JSON Schema.
+  - Schema Object là superset của *JSON Schema* 2020-12 (chuẩn mô tả hình dạng dữ liệu JSON),
+    nên dùng lại được tooling của JSON Schema.
   - Có mục `webhooks` ở top-level để mô tả webhook bạn gửi đi.
 - Bản 3.2 (phát hành 09/2025) thêm:
   - Method `QUERY`.
@@ -1260,8 +1276,8 @@ gateway, BFF, tracing.
     - `parent-id`: id của *span* cha (một bước xử lý trong chuỗi).
     - `flags`: cờ, ví dụ trace này có được lấy mẫu (*sampled*) để lưu hay không.
   - `tracestate`: thông tin thêm riêng của từng hệ thống tracing.
-- ⚠️ Gateway và mọi service phải chuyển tiếp nguyên vẹn hai header này. Một chỗ làm rơi là chuỗi
-  trace bị đứt.
+- ⚠️ Gateway và mọi service phải chuyển tiếp hai header này, giữ nguyên `trace-id`. Service nào
+  tham gia trace thì đổi `parent-id` thành id span của mình. Một chỗ làm rơi là chuỗi trace bị đứt.
 - Chi tiết: [18-reliability-observability.md](18-reliability-observability.md).
 
 *API gateway và BFF*
@@ -1332,7 +1348,7 @@ Cách dùng: tự trả lời thành tiếng trước, sau đó mới đối chi
 
 **8. Thiết kế idempotency key: lưu gì, lưu bao lâu, hai request trùng cùng lúc thì sao?** (2.1)
 - Ý phải có: `(client, key)`, hash body, trạng thái, response; TTL; unique constraint chứ không `SELECT` rồi `INSERT`
-- Điểm cộng: hạn cho `processing`; cùng transaction với nghiệp vụ; không lưu `5xx`; header chưa thành RFC
+- Điểm cộng: hạn cho `processing`; cùng transaction với nghiệp vụ; biết hai trường phái lưu/không lưu `5xx` (Stripe/Brandur); header chưa thành RFC
 
 **9. Offset và cursor pagination khác nhau thế nào? Cursor chứa gì?** (1.4)
 - Ý phải có: vì sao OFFSET chậm và lặp/sót; cursor = giá trị sort + tie-breaker, opaque

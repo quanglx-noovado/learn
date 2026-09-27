@@ -1,6 +1,6 @@
 # 10. Bảo mật
 
-> [← Mục lục](README.md) · Trọng tâm: **bảo mật ứng dụng backend PHP/Laravel 13** theo OWASP Top 10:2025 và OWASP API Security Top 10 (2023), OAuth 2.0 theo RFC 9700.
+> [← Mục lục](README.md) · **[📖 Bài đọc kiến thức](kien-thuc/10-security.md)** · Trọng tâm: **bảo mật ứng dụng backend PHP/Laravel 13** theo OWASP Top 10:2025 và OWASP API Security Top 10 (2023), OAuth 2.0 theo RFC 9700.
 > Ký hiệu: 🟢 junior · 🟡 mid · 🔴 senior · ⚠️ cạm bẫy hay bị hỏi vặn.
 
 File gồm hai phần:
@@ -24,10 +24,10 @@ Dùng xuyên suốt file. Các module bên dưới chỉ rõ đọc phần nào.
 | Tài liệu | Loại | Dùng cho |
 |---|---|---|
 | [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/) | Hướng dẫn thực hành | Nguồn tra cứu chính cho gần như mọi module. Mỗi cheat sheet ngắn, có khuyến nghị cụ thể |
-| [OWASP Top 10:2025](https://owasp.org/Top10/2025/) và [OWASP API Security Top 10 2023](https://owasp.org/API-Security/editions/2023/en/0x11-t10/) | Danh mục rủi ro | Khung để nói chuyện về lỗ hổng. Người phỏng vấn hay hỏi "kể tên" |
+| [OWASP Top 10:2025](https://owasp.org/Top10/2025/) và [OWASP API Security Top 10 2023](https://api-security.owasp.org/editions/2023/en/0x11-t10/) | Danh mục rủi ro | Khung để nói chuyện về lỗ hổng. Người phỏng vấn hay hỏi "kể tên" |
 | [PortSwigger Web Security Academy](https://portswigger.net/web-security) | Khoá học + lab miễn phí | Hiểu lỗ hổng bằng cách tự khai thác. **Làm lab** quan trọng hơn đọc lý thuyết |
 | [OWASP ASVS](https://github.com/OWASP/ASVS) | Tiêu chuẩn kiểm chứng | Checklist yêu cầu bảo mật theo cấp độ, dùng khi review thiết kế |
-| [NIST SP 800-63B-4](https://pages.nist.gov/800-63-4/sp800-63b.html) | Tiêu chuẩn | Password, MFA, authenticator, session (bản chính thức 08/2025) |
+| [NIST SP 800-63B-4](https://pages.nist.gov/800-63-4/sp800-63b.html) | Tiêu chuẩn | Password, MFA, authenticator, session (bản chính thức 07/2025) |
 | [RFC 9700: OAuth 2.0 Security BCP](https://www.rfc-editor.org/rfc/rfc9700) | RFC (01/2025) | Cách dùng OAuth 2.0 an toàn hiện nay. OAuth 2.1 vẫn là Internet-Draft |
 | *Serious Cryptography*, 2nd ed. (Jean-Philippe Aumasson; No Starch 2024) | Sách | Crypto cho kỹ sư: hash, AEAD, RSA/ECC, TLS. Đọc ch.1–4 và phần về authenticated encryption |
 | [Laravel docs](https://laravel.com/docs) và [PHP manual: Security](https://www.php.net/manual/en/security.php) | Official docs | Tầng framework: CSRF, auth, authorization, encryption, hashing |
@@ -67,7 +67,7 @@ mở đầu kinh điển, rồi bị hỏi tiếp sang salt, pepper, reset passw
 - Kẻ lấy được DB không đảo ngược được hash, nhưng có thể **đoán**: hash thử từng password phổ
   biến rồi so với hash trong DB. Vì vậy hàm hash càng nhanh thì đoán càng nhanh.
 - ⚠️ Không dùng MD5, SHA-1, SHA-256 "trần" cho password. Chúng được thiết kế để nhanh, GPU thử
-  được hàng tỷ lần mỗi giây.
+  được hàng chục tỷ lần mỗi giây.
 - Dùng hàm hash password, vốn **chậm có chủ đích** và tự kèm salt:
   - argon2id: OWASP xếp đầu. Tốn cả CPU lẫn RAM, nên GPU khó chạy song song.
   - bcrypt: lâu đời, được hỗ trợ ở mọi nơi. `PASSWORD_DEFAULT` của PHP là bcrypt.
@@ -129,7 +129,9 @@ mở đầu kinh điển, rồi bị hỏi tiếp sang salt, pepper, reset passw
 - ⚠️ *Host header injection*: code dựng link reset từ header `Host` của request, ví dụ
   `https://{Host}/reset?token=...`. Kẻ tấn công gửi request quên mật khẩu cho email nạn nhân với
   `Host: evil.com`, nạn nhân bấm link là token bay về evil.com.
-  - Sửa: dựng link từ domain cấu hình cứng (Laravel: `APP_URL`).
+  - Sửa: dựng link từ domain cấu hình cứng, hoặc chỉ chấp nhận `Host` trong whitelist.
+  - ⚠️ Laravel: đặt `APP_URL` thôi là chưa đủ, vì khi xử lý request, URL tuyệt đối được dựng từ
+    header `Host`. Cần bật `trustHosts()` hoặc cấu hình web server chỉ nhận đúng domain.
 
 *Đối chiếu Java/Go*
 - PHP: `password_hash`, `password_verify`, `password_needs_rehash`.
@@ -175,7 +177,8 @@ Người phỏng vấn hay đưa một header `Set-Cookie` và hỏi từng thu�
   4. Kẻ tấn công dùng chính session id đó, và giờ hắn là nạn nhân.
 - ⚠️ Sửa: **đổi session id ngay sau khi login**.
   - PHP thuần: `session_regenerate_id(true)`.
-  - Laravel: `$request->session()->regenerate()` (các starter kit đã gọi sẵn).
+  - Laravel: `$request->session()->regenerate()` (các starter kit đã gọi sẵn). `Auth::login()`
+    cũng tự đổi session id.
 
 *Các thuộc tính của cookie*
 - `HttpOnly`: JavaScript không đọc được cookie qua `document.cookie`.
@@ -446,7 +449,7 @@ công cụ nào".
 
 **Đọc**
 - OWASP: [Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html), [IDOR Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet.html)
-- OWASP API Top 10: [API1:2023 BOLA](https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/)
+- OWASP API Top 10: [API1:2023 BOLA](https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization/)
 - PortSwigger: [Access control](https://portswigger.net/web-security/access-control)
 
 **Nắm chắc khi**
@@ -494,7 +497,7 @@ tiếng. Người phỏng vấn hay hỏi "verify một JWT gồm những bướ
 3. `nbf` (not before): token đã tới thời điểm có hiệu lực.
 4. `iss` (issuer): đúng bên phát hành mình tin.
 5. `aud` (audience): token được phát cho chính service này.
-6. Cho phép *clock skew* nhỏ (lệch giờ giữa các server, thường vài chục giây) khi so thời gian.
+6. Cho phép *clock skew* nhỏ (lệch giờ giữa các server; RFC 9068 nói thường không quá vài phút) khi so thời gian.
 
 *Các tấn công kinh điển*
 - ⚠️ `alg: none`: kẻ tấn công sửa header thành "không ký" và bỏ chữ ký. Thư viện nào tin `alg`
@@ -589,7 +592,7 @@ người phỏng vấn dùng để phân biệt người chỉ biết dùng thư
 - [RFC 10017: OAuth 2.0 for Browser-Based Applications](https://www.rfc-editor.org/rfc/rfc10017): mục 5 (mối đe doạ từ JavaScript độc) và mục 6 (BFF, token-mediating backend, browser-based client)
 - RFC 9700: [mục 4.14 Refresh Token Protection](https://www.rfc-editor.org/rfc/rfc9700#section-4.14)
 - [Auth0: Refresh Token Rotation](https://auth0.com/docs/secure/tokens/refresh-tokens/refresh-token-rotation) (có mục reuse detection)
-- OWASP: [JSON Web Token Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_Cheat_Sheet.html): phần token sidejacking và revocation
+- OWASP: [JSON Web Token Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_Cheat_Sheet.html): phần threats on JWTs, revocation và replay protection
 
 **Nắm chắc khi**
 - [ ] Vẽ được luồng refresh có rotation, reuse detection và xử lý hai tab refresh cùng lúc
@@ -643,8 +646,10 @@ dựa trên OAuth 2.0 và OIDC. Hiểu sai OAuth dẫn tới lỗi chiếm tài 
   - RFC 9700 yêu cầu PKCE cho *public client* (app không giữ được secret: SPA, mobile) và khuyến
     nghị cho cả *confidential client* (có backend giữ secret).
 - Implicit flow bị bỏ vì:
-  - Token trả thẳng trên URL fragment, lọt vào history và header `Referer`.
-  - Không có back-channel để xác minh.
+  - Token trả thẳng trên URL fragment, lọt vào lịch sử trình duyệt, và script hay extension chạy
+    trong trang đọc được (trình duyệt không gửi fragment trong header `Referer`).
+  - Client không kiểm được access token nhận về có thật sự được phát cho nó không (RFC 10017 mục
+    7.2.4).
 
 *Các cạm bẫy ở callback*
 - `state`: giá trị ngẫu nhiên client gửi đi ở bước 2 và kiểm tra lại ở bước 4, chống CSRF trên
@@ -724,13 +729,16 @@ chống phishing còn OTP thì không", "user mất điện thoại thì khôi p
 - *WebAuthn* là chuẩn web để đăng nhập bằng cặp key.
   - Mỗi site một cặp khoá riêng. Private key nằm ở thiết bị hoặc password manager, không bao giờ
     gửi đi.
-  - Chữ ký gắn với **origin** (gọi là *RP ID*, Relying Party ID, thường là domain của bạn). Trang
+  - Credential gắn với *RP ID* (Relying Party ID): một domain, bằng hoặc là hậu tố của domain
+    trang (ví dụ `example.com` cho `login.example.com`). Trình duyệt chỉ cho dùng key khi RP ID khớp
+    với trang, và **origin** (scheme + host + port) nằm trong dữ liệu được ký. Trang
     giả `g00gle.com` không dùng được key của `google.com`, nên passkey chống phishing.
 - *Passkey* là credential WebAuthn, có hai loại:
   - *Synced*: đồng bộ giữa các thiết bị qua iCloud Keychain, Google Password Manager.
   - *Device-bound*: gắn một thiết bị, ví dụ khoá YubiKey.
 - Server lưu public key, credential id và *sign counter* (bộ đếm tăng mỗi lần ký, giúp phát hiện
-  key bị nhân bản). Không có secret nào để lộ khi DB bị lấy.
+  key bị nhân bản). ⚠️ Synced passkey thường luôn trả counter bằng 0, nên counter chỉ có ý nghĩa
+  với credential một thiết bị. Không có secret nào để lộ khi DB bị lấy.
 - Luồng đăng ký (*registration*):
   1. Server gửi một *challenge* (chuỗi ngẫu nhiên dùng một lần).
   2. Trình duyệt gọi `navigator.credentials.create`, thiết bị tạo cặp key.
@@ -882,7 +890,9 @@ thứ backend PHP gặp thật khi làm tính năng webhook, tải ảnh từ UR
   - Đích nguy hiểm: `169.254.169.254` (metadata của cloud, trả được credential của máy), `localhost`,
     dải IP private (`10.x`, `192.168.x`...).
 - Cách chặn:
-  - Resolve DNS rồi kiểm tra IP, và làm lại sau **mọi** redirect.
+  - Resolve DNS rồi kiểm tra IP.
+  - Tắt tự động follow redirect (OWASP khuyên vậy). Nếu buộc phải theo, kiểm tra lại từ đầu sau
+    **mọi** redirect.
   - Chặn IP private và link-local, kể cả IPv6.
   - Whitelist domain nếu được.
   - Đi qua *egress proxy* (proxy kiểm soát mọi kết nối ra ngoài).
@@ -894,9 +904,11 @@ thứ backend PHP gặp thật khi làm tính năng webhook, tải ảnh từ UR
 
 *Các lỗi injection khác*
 - *XXE* (XML External Entity): file XML khai báo "entity" trỏ tới file hoặc URL, parser đọc vào.
+  Top 10:2025 xếp XXE vào A02 Security Misconfiguration.
   - Chặn: tắt DTD và external entity trong parser.
   - PHP 8 với libxml ≥ 2.9 mặc định không nạp external entity. ⚠️ Đừng truyền cờ `LIBXML_NOENT`,
-    cờ này bật lại việc thay entity.
+    cờ này bật lại việc thay entity. PHP 8.4 thêm cờ `LIBXML_NO_XXE` (cần libxml2 ≥ 2.13) để dùng
+    kèm khi buộc phải có `LIBXML_NOENT`.
 - *Path traversal*: input như `../../etc/passwd` làm đọc file ngoài thư mục cho phép.
   - Chặn: `realpath` rồi kiểm tra đường dẫn vẫn nằm trong thư mục gốc.
   - Tốt hơn: không dùng input làm đường dẫn, dùng id tra ra tên file.
@@ -914,8 +926,10 @@ thứ backend PHP gặp thật khi làm tính năng webhook, tải ảnh từ UR
   3. Code trong các magic method đó của thư viện (gọi là *gadget*) nối với nhau thành *gadget
      chain*, cuối cùng ghi file hoặc chạy lệnh. Đó là RCE (*Remote Code Execution*).
   - Code của bạn không cần gọi hàm nguy hiểm nào, gadget có sẵn trong vendor là đủ.
-- Cách sửa: dùng JSON. Buộc phải dùng `unserialize` thì truyền `['allowed_classes' => false]` và
-  ký HMAC dữ liệu.
+- Cách sửa: dùng JSON.
+  - ⚠️ Docs PHP: không truyền input không tin cậy vào `unserialize` **dù** có `allowed_classes`.
+  - Chỉ `unserialize` dữ liệu do chính mình serialize: ký HMAC lúc tạo, kiểm HMAC **trước** khi
+    unserialize, và vẫn truyền `['allowed_classes' => false]` hoặc danh sách class cụ thể.
 
 *Mass assignment, open redirect, clickjacking*
 - *Mass assignment*: gán thẳng mọi field từ request vào model, user gửi thêm field không được phép.
@@ -932,7 +946,7 @@ thứ backend PHP gặp thật khi làm tính năng webhook, tải ảnh từ UR
 *File upload*
 - Kiểm tra và lưu:
   - Kiểm tra loại thật bằng *magic bytes* (vài byte đầu file), không tin đuôi file hay
-    `Content-Type` client gửi.
+    `Content-Type` client gửi. Magic bytes cũng dễ giả, nên chỉ là một lớp, phải đi kèm các bước dưới.
   - Đổi tên ngẫu nhiên.
   - Lưu ngoài web root hoặc trên object storage (S3). Không cho thực thi.
 - Phục vụ file:
@@ -947,7 +961,7 @@ thứ backend PHP gặp thật khi làm tính năng webhook, tải ảnh từ UR
 
 **Đọc**
 - [OWASP Top 10:2025](https://owasp.org/Top10/2025/): đọc trang giới thiệu (thay đổi so với 2021) và trang của A01, A03, A10
-- [OWASP API Security Top 10 2023](https://owasp.org/API-Security/editions/2023/en/0x11-t10/)
+- [OWASP API Security Top 10 2023](https://api-security.owasp.org/editions/2023/en/0x11-t10/)
 - OWASP cheat sheets: [SSRF](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html), [XXE](https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html), [Deserialization](https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html), [Mass Assignment](https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html), [File Upload](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html), [OS Command Injection](https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html), [Unvalidated Redirects](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html)
 - PortSwigger (làm lab): [SSRF](https://portswigger.net/web-security/ssrf), [XXE](https://portswigger.net/web-security/xxe), [Path traversal](https://portswigger.net/web-security/file-path-traversal), [OS command injection](https://portswigger.net/web-security/os-command-injection), [Insecure deserialization](https://portswigger.net/web-security/deserialization), [File upload](https://portswigger.net/web-security/file-upload)
 - PHP: [unserialize](https://www.php.net/manual/en/function.unserialize.php) (đọc khung cảnh báo), [escapeshellarg](https://www.php.net/manual/en/function.escapeshellarg.php)
@@ -1078,7 +1092,8 @@ ra sao, `APP_KEY` lộ thì sao, `==` của PHP nguy hiểm thế nào.
 
 *Supply chain*
 - `composer audit` kiểm tra dependency có lỗ hổng đã công bố.
-- Từ Composer 2.9, mặc định **chặn** cài bản có security advisory (`audit.block-insecure`).
+- Từ Composer 2.9, mặc định **chặn update** sang bản có security advisory (`audit.block-insecure`).
+  `composer install` từ lockfile có sẵn thì không bị chặn, nên vẫn cần `composer audit` trong CI.
 - Commit `composer.lock` (module 3.4).
 
 **Đọc**
@@ -1146,7 +1161,7 @@ force thế nào" rồi hỏi tiếp "vậy credential stuffing thì sao".
 
 **Đọc**
 - OWASP: [Credential Stuffing Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Credential_Stuffing_Prevention_Cheat_Sheet.html), [Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) (mục account lockout và error messages)
-- OWASP API Top 10: [API6:2023 Unrestricted Access to Sensitive Business Flows](https://owasp.org/API-Security/editions/2023/en/0xa6-unrestricted-access-to-sensitive-business-flows/)
+- OWASP API Top 10: [API6:2023 Unrestricted Access to Sensitive Business Flows](https://api-security.owasp.org/editions/2023/en/0xa6-unrestricted-access-to-sensitive-business-flows/)
 - Laravel: [Rate Limiting](https://laravel.com/docs/rate-limiting)
 
 **Nắm chắc khi**
@@ -1432,8 +1447,9 @@ thì phải xoá ở đâu", "log thế nào để không lộ PII".
 
 *PII và phân loại*
 - *PII* (Personally Identifiable Information): dữ liệu xác định được một người.
-  - Thông thường: tên, email, SĐT, địa chỉ, số CCCD, ngày sinh, vị trí, IP.
-  - Nhạy cảm hơn: sức khoẻ, tài chính, sinh trắc học.
+  - Thông thường: tên, email, SĐT, địa chỉ, số CCCD, ngày sinh, IP.
+  - Nhạy cảm (Nghị định 356/2025/NĐ-CP Điều 4): sức khoẻ, sinh trắc học, vị trí xác định qua dịch vụ
+    định vị, thông tin tài chính và lịch sử giao dịch tại tổ chức tín dụng, trung gian thanh toán...
 - *Data minimization*: chỉ thu thập và giữ dữ liệu thật sự cần.
 - Phân loại dữ liệu theo mức: public, internal, confidential, restricted. Mỗi mức có quy tắc truy
   cập và lưu trữ riêng.
@@ -1464,9 +1480,11 @@ thì phải xoá ở đâu", "log thế nào để không lộ PII".
   kể cả bản nằm trong backup.
 
 *Pháp lý, mức "biết tồn tại"*
-- GDPR (EU) áp dụng khi xử lý dữ liệu của người ở EU, kể cả khi công ty ở Việt Nam.
-- Việt Nam: **Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15**, hiệu lực từ 01/01/2026, thay thế
-  Nghị định 13/2023/NĐ-CP. Nghị định 356/2025/NĐ-CP quy định chi tiết.
+- GDPR (EU) áp dụng cả với công ty ở Việt Nam nếu chào bán hàng hoá, dịch vụ cho người ở EU hoặc
+  theo dõi hành vi của họ trong EU (Art. 3(2)).
+- Việt Nam: **Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15**, hiệu lực từ 01/01/2026.
+  Nghị định 356/2025/NĐ-CP (31/12/2025) quy định chi tiết, và theo Điều 42 của nó thì Nghị định
+  13/2023/NĐ-CP hết hiệu lực từ 01/01/2026.
 - Ý chung của các luật:
   - Có căn cứ hoặc sự đồng ý khi xử lý dữ liệu.
   - Quyền của chủ thể dữ liệu: biết, đồng ý, truy cập, sửa, xoá.
@@ -1476,7 +1494,7 @@ thì phải xoá ở đâu", "log thế nào để không lộ PII".
 
 **Đọc**
 - OWASP: [Logging Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html) (mục data to exclude)
-- [Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15](https://chinhphu.vn/?pageid=27160&docid=214590&classid=1&typegroupid=3): lướt mục lục, đọc chương về quyền của chủ thể dữ liệu
+- [Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15](https://chinhphu.vn/?pageid=27160&docid=214590&classid=1&typegroupid=3): lướt mục lục, đọc Điều 4 (quyền và nghĩa vụ của chủ thể dữ liệu, trong Chương I)
 - [GDPR: Art. 17 Right to erasure](https://gdpr-info.eu/art-17-gdpr/) và [Art. 33 Notification of breach](https://gdpr-info.eu/art-33-gdpr/)
 
 **Nắm chắc khi**

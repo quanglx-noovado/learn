@@ -1,6 +1,6 @@
 # 03. Database quan hệ và SQL
 
-> [← Mục lục](README.md) · Trọng tâm: **MySQL 8.4 LTS / InnoDB** (stack PHP), đối chiếu PostgreSQL 17–18.
+> [← Mục lục](README.md) · **[📖 Bài đọc kiến thức](kien-thuc/03-database-sql.md)** · Trọng tâm: **MySQL 8.4 LTS / InnoDB** (stack PHP), đối chiếu PostgreSQL 17–18.
 > Ký hiệu: 🟢 junior · 🟡 mid · 🔴 senior · ⚠️ cạm bẫy hay bị hỏi vặn.
 
 File gồm hai phần:
@@ -277,7 +277,7 @@ nguồn bug kinh điển, nhất là ở Việt Nam với múi giờ UTC+7.
   ngược lại. Kiểu này chỉ lưu được tới 2038-01-19.
 - Nguyên tắc chung:
   - Lưu UTC, chỉ đổi sang timezone của người dùng khi hiển thị.
-  - Timezone của PHP (`date.timezone`, `APP_TIMEZONE` của Laravel) và timezone của session MySQL
+  - Timezone của PHP (`date.timezone`, khoá `timezone` trong `config/app.php` của Laravel) và timezone của session MySQL
     phải thống nhất.
 - ⚠️ Bug "lệch 7 tiếng": PHP chạy UTC+7, session MySQL để UTC, cột kiểu `TIMESTAMP`. Giá trị bị
   quy đổi thêm một lần ngoài ý muốn.
@@ -428,7 +428,8 @@ và đoán trước được `EXPLAIN` sẽ ra gì.
   một phần lớn của bảng, optimizer chọn quét cả bảng tuần tự, và thường đó là quyết định đúng.
 - ⚠️ Cột ít giá trị khác nhau vẫn đáng index nếu dữ liệu bị lệch.
   - Ví dụ: `status = 'pending'` chỉ chiếm 0,1% số dòng.
-  - Optimizer cần *histogram* thì mới biết được sự lệch này (module 2.3).
+  - Với cột có index, optimizer đếm thử trên chính index (*index dive*) nên thường biết được sự lệch
+    này. Với cột không có index, nó cần *histogram* (module 2.3).
 
 *Công cụ nên biết*
 - *Skip scan* (MySQL 8.0.13+, Postgres 18) cho phép dùng index `(a, b)` với điều kiện `WHERE b = ?`
@@ -509,7 +510,9 @@ RAM không chứa đủ dữ liệu nóng.
 - `LIMIT 20 OFFSET 100000` vẫn phải đọc 100.020 dòng rồi bỏ đi 100.000 dòng đầu. Trang càng sâu
   càng chậm.
 - *Keyset pagination* (còn gọi là cursor pagination) nhớ giá trị cuối của trang trước:
-  `WHERE (created_at, id) < (?, ?) ORDER BY created_at DESC, id DESC LIMIT 20`
+  `WHERE created_at < ? OR (created_at = ? AND id < ?) ORDER BY created_at DESC, id DESC LIMIT 20`
+  - ⚠️ Postgres dùng index tốt với dạng gọn `(created_at, id) < (?, ?)`. MySQL có thể không dùng
+    hết index với dạng này, nên với MySQL hãy viết dạng `OR` như trên và kiểm tra bằng `EXPLAIN`.
   - Nhanh đều ở mọi trang.
   - Cần cột `id` làm *tie-breaker* khi nhiều dòng trùng `created_at`.
   - Không nhảy thẳng tới trang N được.
@@ -573,8 +576,8 @@ RAM không chứa đủ dữ liệu nóng.
 
 *UPSERT*
 - UPSERT là "có rồi thì cập nhật, chưa có thì thêm mới" trong **một câu lệnh atomic**.
-- MySQL viết `INSERT ... ON DUPLICATE KEY UPDATE`. Từ 8.0.20 nên viết `AS new` rồi dùng
-  `new.qty`, thay cho `VALUES(qty)`.
+- MySQL viết `INSERT ... ON DUPLICATE KEY UPDATE`. Từ 8.0.19 viết được `AS new` rồi dùng
+  `new.qty`; từ 8.0.20 cách cũ `VALUES(qty)` bị deprecate.
 - Vì sao không viết SELECT rồi INSERT: hai request cùng SELECT, cùng thấy chưa có, rồi cùng INSERT,
   dẫn tới trùng dữ liệu hoặc lỗi.
 - ⚠️ Bảng có nhiều unique key thì không biết key nào đã kích hoạt nhánh update.
@@ -628,6 +631,12 @@ này dẫn thẳng tới bug về tiền và tồn kho.
 | Phantom | Có | Phần lớn chặn được | Có | Không | Không |
 | Lost update (app đọc rồi ghi) | Có | **Có** | Có | Báo lỗi, phải retry | Báo lỗi |
 | Write skew | Có | Có | Có | Có | Chặn |
+
+- Hai ghi chú cho cột MySQL:
+  - MySQL RR chặn non-repeatable read và read skew khi transaction **chỉ đọc**. Nếu trong transaction
+    có câu ghi hoặc locking read, bạn có thể thấy dữ liệu mới (xem phần "hai kiểu đọc" ngay dưới).
+  - MySQL Serializable (không có trong bảng) biến `SELECT` thường thành `SELECT ... FOR SHARE`, nên
+    lost update và write skew bị chặn bằng lock, thường lộ ra thành deadlock (lỗi 1213) và phải retry.
 
 *MySQL RR thật ra hoạt động thế nào*
 - InnoDB dùng *MVCC*: giữ nhiều phiên bản của một dòng, và mỗi transaction đọc phiên bản đúng với
@@ -759,11 +768,14 @@ DB, vì đây là nơi lộ ra bạn chỉ dùng Laravel hay hiểu Laravel làm
 - PDO là lớp truy cập DB chuẩn của PHP. Laravel dùng PDO ở bên dưới.
 - *Prepared statement*: gửi câu SQL có chỗ trống (`?`) và gửi giá trị riêng. Nhờ vậy giá trị không
   bao giờ bị hiểu là SQL, và đây là cách chống SQL injection.
-- ⚠️ `PDO_MYSQL` mặc định dùng **emulate prepare**: PHP tự escape giá trị, ghép vào chuỗi SQL rồi
-  gửi một lần, không dùng prepared statement thật của MySQL.
+- ⚠️ `PDO_MYSQL` dùng trực tiếp thì mặc định là **emulate prepare**: PHP tự escape giá trị, ghép vào
+  chuỗi SQL rồi gửi một lần, không dùng prepared statement thật của MySQL.
   - Cách này vẫn an toàn nếu charset của kết nối đúng (khai `charset=utf8mb4` trong DSN).
-  - Nhưng kiểu dữ liệu trả về khác đi, và lỗi cú pháp chỉ bị phát hiện lúc execute.
+  - Lỗi cú pháp chỉ bị phát hiện lúc execute. Trước PHP 8.1, số nguyên và số thực còn bị trả về dạng
+    chuỗi; từ 8.1 đã trả đúng kiểu.
   - Tắt bằng `PDO::ATTR_EMULATE_PREPARES => false` nếu muốn dùng prepare thật.
+  - Laravel đã đặt sẵn `ATTR_EMULATE_PREPARES => false` trong connector, nên app Laravel mặc định
+    dùng prepare thật.
 - `ERRMODE_EXCEPTION`: lỗi SQL ném exception thay vì trả về `false`. Đây là mặc định từ PHP 8.
 - *Buffered query* (mặc định): toàn bộ kết quả được kéo về RAM của PHP rồi mới duyệt. Một query ra
   1 triệu dòng có thể vượt `memory_limit`. Muốn duyệt từng dòng thì dùng unbuffered query hoặc cursor.
@@ -809,7 +821,8 @@ DB, vì đây là nơi lộ ra bạn chỉ dùng Laravel hay hiểu Laravel làm
 
 *Transaction trong Laravel*
 - `DB::transaction(fn, attempts)` tự commit hoặc rollback. Nếu `attempts > 1`, closure được chạy lại
-  khi gặp deadlock.
+  khi gặp lỗi do tranh chấp: deadlock, lock wait timeout, lỗi serialization (SQLSTATE `40001`). Mặc
+  định `attempts` là 1, tức không retry. Retry chỉ xảy ra ở transaction ngoài cùng.
   - ⚠️ Vì vậy closure phải chạy lại được một cách an toàn. Đừng gửi email bên trong nó.
 - ⚠️ Câu DDL (`CREATE`, `ALTER`) trong MySQL tự commit transaction đang mở (gọi là *implicit
   commit*). Hệ quả: migration nhiều bước lỗi giữa chừng thì không rollback được, và schema bị dở dang.
@@ -946,8 +959,9 @@ Các lựa chọn ở đây rất khó đổi lại về sau.
 - ⚠️ Bảng audit lớn rất nhanh. Nên partition theo thời gian ngay từ đầu.
 
 *Enum*
-- `ENUM` của MySQL gọn, nhưng thêm giá trị mới phải `ALTER TABLE`, và sort theo thứ tự khai báo chứ
-  không theo chữ cái.
+- `ENUM` của MySQL gọn, nhưng đổi danh sách giá trị phải `ALTER TABLE`, và sort theo thứ tự khai báo
+  chứ không theo chữ cái. Thêm giá trị vào **cuối** danh sách thường làm được tức thì; xoá hay đổi
+  thứ tự thì phải dựng lại bảng.
 - Cách thay thế: `VARCHAR` kèm `CHECK`, hoặc bảng lookup kèm FK. Ở tầng app thì dùng enum của PHP 8.1
   với cast của Eloquent.
 
@@ -974,7 +988,7 @@ transaction mở lâu làm cả DB chậm". Muốn trả lời phải hiểu bê
 
 *Buffer pool*
 - InnoDB không đọc hay ghi đĩa trực tiếp cho mỗi query. Nó giữ các page trong một vùng RAM lớn gọi
-  là *buffer pool* (`innodb_buffer_pool_size`), thường chiếm 50–75% RAM của một máy chỉ chạy DB.
+  là *buffer pool* (`innodb_buffer_pool_size`), docs khuyên đặt tới khoảng 80% RAM của một máy chỉ chạy DB.
 - Sửa dữ liệu nghĩa là sửa page trong RAM. Page đó trở thành *dirty page*, và được ghi xuống đĩa dần
   ở chế độ nền.
 - Dữ liệu hay dùng (*working set*) mà vừa buffer pool thì nhanh. Vượt quá thì phải đọc đĩa liên tục,
@@ -1030,8 +1044,9 @@ transaction mở lâu làm cả DB chậm". Muốn trả lời phải hiểu bê
 
 *Binlog format*
 - `ROW` (mặc định) ghi các dòng đã thay đổi. `STATEMENT` ghi câu SQL. `MIXED` kết hợp cả hai.
-- ⚠️ `STATEMENT` không an toàn với câu lệnh không tất định như `NOW()`, `UUID()`, hay `LIMIT` không
-  có `ORDER BY`: replica chạy lại có thể ra kết quả khác.
+- ⚠️ `STATEMENT` không an toàn với câu lệnh không tất định như `UUID()`, `SYSDATE()`, `RAND()`, hay
+  `LIMIT` không có `ORDER BY`: replica chạy lại có thể ra kết quả khác. `NOW()` thì an toàn, vì binlog
+  ghi kèm timestamp của câu lệnh.
 
 *Đối chiếu Postgres*
 - Postgres không có undo log. Bản cũ của dòng nằm ngay trong bảng, và `VACUUM` là thứ dọn chúng.
@@ -1099,7 +1114,7 @@ lên. Senior phải đọc được log và giải thích được từng bướ
 
 *AUTO-INC lock*
 - `innodb_autoinc_lock_mode` từ 8.0 mặc định là 2 (interleaved): id được cấp nhanh nhưng không liên
-  tục, và binlog phải dùng format `ROW`.
+  tục, và binlog nên dùng format `ROW` hoặc `MIXED`: với `STATEMENT`, id cấp cho insert hàng loạt có thể khác nhau giữa primary và replica.
 
 *Đọc deadlock log*
 - Mở `SHOW ENGINE INNODB STATUS` và tìm mục `LATEST DETECTED DEADLOCK`. Với mỗi transaction, xem:
@@ -1157,6 +1172,8 @@ downtime lớn nhất năm.
 - Khai rõ `ALGORITHM=INSTANT` hoặc `INPLACE` trong câu `ALTER`. Nếu MySQL không làm được theo cách
   đó thì nó báo lỗi ngay, thay vì âm thầm chuyển sang `COPY`.
 - Mọi loại đều cần MDL exclusive trong một khoảnh khắc, nên vẫn có thể dính sự cố MDL ở module 3.2.
+- Laravel 13 có modifier cho việc này: `->instant()` và `->lock()` cho cột, `->inplace()` cho index
+  và khoá ngoại.
 
 *Tool cho các thao tác phải COPY*
 - **pt-online-schema-change**:
@@ -1229,7 +1246,8 @@ là nguồn sự cố, vừa là chủ đề câu hỏi quen thuộc.
   - Áp log không đủ song song.
   - Có query nặng đang chạy trên replica.
 - Cách đo: `Seconds_Behind_Source`.
-  - ⚠️ Chỉ số này không hoàn toàn đáng tin; ví dụ nó có thể bằng 0 khi luồng nhận log đã ngừng.
+  - ⚠️ Chỉ số này không hoàn toàn đáng tin: nó là NULL khi luồng nhận log đã ngừng, và có thể hiện 0
+    gây hiểu nhầm khi mạng chậm khiến replica chưa nhận được log mới.
   - Cách tốt hơn là dùng heartbeat table (`pt-heartbeat`).
 
 *Read-your-writes*

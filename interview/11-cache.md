@@ -1,6 +1,6 @@
 # 11. Cache
 
-> [← Mục lục](README.md) · Trọng tâm: cache ứng dụng bằng **Redis/Valkey** trong stack **PHP/Laravel**: pattern đọc/ghi, invalidation và race condition, stampede/penetration/avalanche, eviction, multi-level cache, đo lường. Đối chiếu Spring và Go.
+> [← Mục lục](README.md) · **[📖 Bài đọc kiến thức](kien-thuc/11-cache.md)** · Trọng tâm: cache ứng dụng bằng **Redis/Valkey** trong stack **PHP/Laravel**: pattern đọc/ghi, invalidation và race condition, stampede/penetration/avalanche, eviction, multi-level cache, đo lường. Đối chiếu Spring và Go.
 > Ký hiệu: 🟢 junior · 🟡 mid · 🔴 senior · ⚠️ cạm bẫy hay bị hỏi vặn.
 
 File gồm hai phần:
@@ -88,7 +88,9 @@ các tầng cache", "`no-cache` khác `no-store` thế nào".
 
 *HTTP caching*
 - Header `Cache-Control` báo cho browser, CDN và proxy cách cache một response:
-  - `public`: mọi tầng được lưu, kể cả CDN. `private`: chỉ browser của người đó được lưu.
+  - `private`: chỉ browser của người đó được lưu. `public`: shared cache (CDN, proxy) cũng được lưu,
+    kể cả khi request có header `Authorization` (response có `max-age` thì shared cache đã lưu được,
+    `public` cần nhất trong trường hợp có `Authorization`).
   - `max-age=N`: được dùng lại trong N giây. `s-maxage=N`: như `max-age` nhưng chỉ cho cache dùng
     chung (CDN, proxy).
   - `no-cache`, `no-store`: xem cạm bẫy ngay dưới.
@@ -451,13 +453,16 @@ Câu hỏi hay gặp: "trang chủ flash sale làm một node Redis 100% CPU, x�
   - Chia nhỏ, nén.
   - Chỉ lấy phần cần: `HGET` thay `HGETALL`, duyệt dần bằng `HSCAN`.
   - Xoá bằng `UNLINK` (giải phóng bộ nhớ ở thread nền) thay `DEL`.
-- Phát hiện: `redis-cli --bigkeys`, `MEMORY USAGE`.
+- Phát hiện: `redis-cli --bigkeys` (đếm theo số phần tử), `redis-cli --memkeys` và `MEMORY USAGE`
+  (đo theo byte).
 
 *`maxmemory-policy`*
 - Quyết định Redis bỏ key nào khi đầy bộ nhớ:
-  - `noeviction` (mặc định): không bỏ gì, lệnh ghi báo lỗi khi đầy.
+  - `noeviction` (mặc định của Redis tự cài; ElastiCache mặc định `volatile-lru`): không bỏ gì, lệnh
+    ghi báo lỗi khi đầy.
   - `allkeys-lru`, `allkeys-lfu`: bỏ trong mọi key.
-  - `volatile-*`: chỉ bỏ trong các key có TTL.
+  - `volatile-*`: chỉ bỏ trong các key có TTL; `volatile-ttl` bỏ key sắp hết hạn nhất.
+  - Redis 8.6 thêm `allkeys-lrm` và `volatile-lrm`.
   - `allkeys-random`: bỏ ngẫu nhiên.
 - LRU/LFU của Redis là xấp xỉ: chỉ lấy mẫu một số key rồi bỏ key tệ nhất trong mẫu.
 - ⚠️ Vừa làm cache vừa lưu session/queue với policy `allkeys-*` thì dữ liệu quan trọng cũng bị evict.
@@ -634,8 +639,9 @@ cũng hay hỏi các API cache của Laravel và những lệnh artisan có th�
   - ⚠️ Nhầm OPcache với cache dữ liệu là red flag.
   - `opcache.validate_timestamps=0` trên production thì PHP không kiểm tra file đổi, nên deploy phải
     reset OPcache.
-- Octane (chạy bằng Swoole, RoadRunner hoặc FrankenPHP): process sống lâu qua nhiều request, có
-  [Octane cache](https://laravel.com/docs/octane#the-octane-cache) trong bộ nhớ.
+- Octane (chạy bằng Swoole, RoadRunner hoặc FrankenPHP): process sống lâu qua nhiều request.
+  [Octane cache](https://laravel.com/docs/octane#the-octane-cache) là bảng dùng chung giữa các worker
+  **chỉ khi chạy Swoole**; với server khác, store `octane` lặng lẽ rơi về mảng riêng của từng worker.
   - ⚠️ Biến static và singleton sống qua request, nên có thể rò dữ liệu của request trước sang request
     sau.
 
@@ -663,7 +669,10 @@ cũng hay hỏi các API cache của Laravel và những lệnh artisan có th�
 *Các cạm bẫy của Laravel*
 - ⚠️ `php artisan cache:clear` flush **cả DB Redis** mà cache store đang dùng.
   - Dùng chung DB đó với queue thì mất job. Dùng chung với session thì mọi người bị đăng xuất.
-  - Sửa: tách connection hoặc DB Redis cho cache, queue, session.
+  - Sửa: tách connection hoặc DB Redis cho cache, queue, session. Skeleton Laravel 13 đã tách sẵn
+    (cache ở DB 1, còn lại ở DB 0), nhưng ⚠️ `cache:clear --locks` vẫn flush DB 0.
+- ⚠️ Laravel 13 mặc định `serializable_classes => false` trong `config/cache.php`: cache một object
+  (kể cả model) thì lần đọc sau nhận `__PHP_Incomplete_Class`. Cache mảng hoặc khai báo class được phép.
 - ⚠️ Cache nguyên model Eloquent: serialize cả các relation đã load, và đổi class là lỗi khi đọc lại.
   Cache mảng hoặc DTO đơn giản thì an toàn hơn.
 

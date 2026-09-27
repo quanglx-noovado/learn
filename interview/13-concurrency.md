@@ -1,6 +1,6 @@
 # 13. Concurrency
 
-> [← Mục lục](README.md) · Trọng tâm: **race condition ở mức ứng dụng web** (PHP-FPM, MySQL, Redis, queue, nhiều instance), nền tảng primitive và memory model, đối chiếu Java (JDK 25 LTS) và Go.
+> [← Mục lục](README.md) · **[📖 Bài đọc kiến thức](kien-thuc/13-concurrency.md)** · Trọng tâm: **race condition ở mức ứng dụng web** (PHP-FPM, MySQL, Redis, queue, nhiều instance), nền tảng primitive và memory model, đối chiếu Java (JDK 25 LTS) và Go.
 > Ký hiệu: 🟢 junior · 🟡 mid · 🔴 senior · ⚠️ cạm bẫy hay bị hỏi vặn.
 
 File gồm hai phần:
@@ -166,8 +166,10 @@ còn vòng Java/Go hay bắt viết producer–consumer.
 - *Semaphore* giữ N "vé" (*permit*). Luồng lấy một vé thì được vào, trả vé khi xong. Hết vé thì
   luồng mới phải chờ.
 - Dùng để giới hạn số luồng cùng dùng một tài nguyên, ví dụ tối đa 10 kết nối cùng lúc tới API ngoài.
-- Khác mutex: mutex có "chủ sở hữu" (ai lock thì chính người đó unlock). Semaphore thì không,
-  luồng này lấy vé, luồng khác trả được.
+- Khác mutex: mutex thường có "chủ sở hữu" (ai lock thì chính người đó unlock, ví dụ Java
+  `ReentrantLock`). Semaphore thì không, luồng này lấy vé, luồng khác trả được.
+  - ⚠️ Go `sync.Mutex` không gắn với goroutine: goroutine khác unlock được. Quy ước "ai lock
+    người đó unlock" trong Go là kỷ luật của người viết, không phải runtime ép.
 - Go có hai cách: buffered channel hoặc `x/sync/semaphore`. Java có `Semaphore`.
 
   ```go
@@ -236,7 +238,7 @@ trong DB, tránh thế nào" gần như luôn có ở mức junior, và người
 |---|---|---|
 | Mutual exclusion | Tài nguyên mỗi lúc chỉ một bên giữ | Thường không phá được, vì đó chính là mục đích của khoá |
 | Hold and wait | Giữ khoá này trong lúc chờ khoá khác | Lấy hết mọi khoá một lần, hoặc không lấy gì |
-| No preemption | Không ai giật được khoá bên kia đang giữ | Timeout khi lấy khoá (`tryLock`, `innodb_lock_wait_timeout`): chờ quá lâu thì tự bỏ cuộc và nhả khoá của mình |
+| No preemption | Không ai giật được khoá bên kia đang giữ | Timeout khi lấy khoá (`tryLock`): chờ quá lâu thì tự bỏ cuộc và nhả khoá của mình. ⚠️ `innodb_lock_wait_timeout` mặc định chỉ rollback câu lệnh đang chờ, transaction vẫn giữ các khoá đã lấy; app phải tự rollback |
 | Circular wait | Các bên chờ nhau thành vòng | **Khoá theo thứ tự cố định**, ví dụ luôn khoá id nhỏ trước |
 
 - Thêm một quy tắc: không gọi code lạ (callback, hook, event listener) khi đang giữ khoá. Code đó
@@ -435,7 +437,7 @@ dùng được cả ba. Câu hay gặp: "optimistic lock và pessimistic lock, k
 - Ở tầng HTTP, cặp `ETag` + `If-Match` là cùng ý tưởng ([09-api-design.md](09-api-design.md)):
   - Server trả `ETag`, một mã đại diện cho phiên bản hiện tại của tài nguyên.
   - Client gửi lại mã đó trong header `If-Match` khi sửa.
-  - Mã không khớp nghĩa là tài nguyên đã đổi, server từ chối.
+  - Mã không khớp nghĩa là tài nguyên đã đổi, server từ chối bằng `412 Precondition Failed`.
 
 *Chọn optimistic hay pessimistic*
 
@@ -505,6 +507,8 @@ READ, hai transaction đọc-sửa-ghi cùng một dòng thì sao". Trả lời 
   3. T2 cũng tính ra 4 từ snapshot, ghi `stock = 4` và commit. Một lần trừ bị mất.
 - Vì sao `UPDATE t SET stock = stock - 1` lại an toàn ở InnoDB RR: `UPDATE` là locking read, nên
   nó đọc bản mới nhất (4) chứ không đọc snapshot (5), và khoá dòng trong lúc trừ.
+  - ⚠️ Ở Postgres RR thì khác: cả `SET stock = stock - 1` cũng báo lỗi `40001` nếu dòng đã bị
+    transaction khác sửa và commit sau khi transaction này bắt đầu. Vẫn phải retry.
 - ⚠️ READ COMMITTED, mặc định của Postgres, không chặn lost update kiểu "app đọc, tự tính, rồi ghi".
 
 *Write skew*
@@ -544,15 +548,18 @@ nào" hay gặp ở mức mid. Câu trả lời "disable nút bấm" bị coi l�
 - Một thao tác là *idempotent* nếu gọi nó nhiều lần cho kết quả giống hệt gọi một lần.
 - *Idempotency key* là một chuỗi ngẫu nhiên do **client** sinh cho mỗi thao tác, gửi trong header
   `Idempotency-Key`. Client retry thì gửi lại đúng key đó.
-- Server lưu một bảng, có unique constraint trên key:
+- Server lưu một bảng, có unique constraint trên `(user_id, idem_key)`. Key do client sinh nên
+  chỉ cần duy nhất trong phạm vi một user (Brandur và Stripe làm vậy):
 
   ```sql
   CREATE TABLE idempotency_keys (
-    idem_key     VARCHAR(64) PRIMARY KEY,
+    user_id      BIGINT      NOT NULL,
+    idem_key     VARCHAR(64) NOT NULL,
     request_hash CHAR(64)    NOT NULL,   -- hash của body để phát hiện cùng key khác nội dung
     status       VARCHAR(16) NOT NULL,   -- processing | done
     response     JSON        NULL,
-    created_at   DATETIME    NOT NULL
+    created_at   DATETIME    NOT NULL,
+    UNIQUE (user_id, idem_key)
   );
   ```
 - Luồng xử lý:
@@ -612,9 +619,11 @@ con số cố định.
 - Việc *CPU-bound* (chủ yếu tính toán): khoảng bằng số core. Thêm thread cũng không có thêm core.
 - Việc *I/O-bound* (chủ yếu chờ DB, mạng): dùng công thức trong JCIP:
 
-  `số thread ≈ số core × (1 + thời gian chờ / thời gian tính)`
+  `số thread ≈ số core × mức dùng CPU mong muốn × (1 + thời gian chờ / thời gian tính)`
 
-  - Ví dụ: 8 core, mỗi việc chờ DB 90 ms và tính 10 ms: `8 × (1 + 90/10) = 80` thread.
+  - Bản gốc trong JCIP: `N_threads = N_cpu × U_cpu × (1 + W/C)`, với `U_cpu` từ 0 tới 1.
+  - Ví dụ: 8 core, muốn dùng hết CPU (`U_cpu = 1`), mỗi việc chờ DB 90 ms và tính 10 ms:
+    `8 × 1 × (1 + 90/10) = 80` thread.
 
 *Little's law*
 - `L = λ × W`:
@@ -702,6 +711,7 @@ dependency. Câu hay gặp: "viết worker pool có giới hạn và huỷ đư�
 *Bẫy thường gặp*
 - Biến vòng lặp: trước Go 1.22, closure trong vòng `for` dùng chung **một** biến cho mọi vòng lặp,
   nên các goroutine hay đọc phải giá trị cuối. Từ 1.22, mỗi vòng lặp có một biến riêng.
+  - ⚠️ Chỉ áp dụng khi `go.mod` khai `go 1.22` trở lên. Module khai phiên bản cũ hơn vẫn giữ hành vi cũ.
 - ⚠️ Hai goroutine cùng ghi vào một `map` thường thì runtime báo `concurrent map writes` và
   **crash cả process**.
   - Sửa bằng mutex, hoặc `sync.Map`. `sync.Map` chỉ hợp với vài pattern cụ thể (key ghi một lần
@@ -716,7 +726,7 @@ dependency. Câu hay gặp: "viết worker pool có giới hạn và huỷ đư�
 - `ExecutorService` là thread pool. `CompletableFuture` để nối và gộp các việc bất đồng bộ.
 - `ConcurrentHashMap.computeIfAbsent` là cách an toàn cho "chưa có thì tính và lưu".
 - *Structured concurrency* (gom các việc con thành một khối, khối kết thúc khi mọi việc con xong
-  hoặc bị huỷ, tương tự `errgroup`) vẫn đang ở dạng preview.
+  hoặc bị huỷ, tương tự `errgroup`) vẫn đang ở dạng preview (tới JDK 27, JEP 533).
 
 **Đọc**
 - Go blog: [Pipelines and cancellation](https://go.dev/blog/pipelines), [Share Memory By Communicating](https://go.dev/blog/codelab-share), [Fixing For Loops in Go 1.22](https://go.dev/blog/loopvar-preview)
@@ -752,7 +762,7 @@ về virtual thread.
   |---|---|---|---|
   | PHP-FPM | Mỗi request một process | Process đứng chờ | Share-nothing (các request không chia sẻ biến nào). Số request đồng thời bằng số worker |
   | Thread OS (Java cổ điển) | Mỗi request một thread | OS lập lịch thread khác | Tốn bộ nhớ, giới hạn khoảng vài nghìn |
-  | Event loop + async/await (Node.js, ReactPHP, Swoole coroutine) | Một thread, callback hoặc coroutine | Không được chặn, phải `await` | ⚠️ Một việc CPU nặng chặn cả loop. Bị function coloring |
+  | Event loop + async/await (Node.js, ReactPHP, Swoole coroutine) | Một thread, callback hoặc coroutine | Không được chặn, phải `await` | ⚠️ Một việc CPU nặng chặn cả loop. Node.js, ReactPHP bị function coloring; Swoole coroutine bật *runtime hook* (PDO, phpredis, curl thành non-blocking) thì không |
   | Goroutine (Go) | M:N, runtime lập lịch | Runtime park goroutine | Viết code đồng bộ bình thường, chạy được hàng trăm nghìn goroutine |
   | Virtual thread (Java 21+) | M:N trên *carrier thread* (thread OS chở virtual thread) | JVM park virtual thread | Viết code blocking bình thường. ⚠️ Đừng pool virtual thread, vì chúng rẻ, cứ tạo mới |
 
@@ -807,12 +817,12 @@ công cụ chống race; biết dùng đúng cái nào cho việc nào là đi�
 | Công cụ | Chặn cái gì | Cạm bẫy |
 |---|---|---|
 | `lockForUpdate()` / `sharedLock()` trong `DB::transaction()` | Pessimistic lock ở DB (`FOR UPDATE` / `FOR SHARE`) | Phải nằm trong transaction |
-| `Cache::lock('key', 10)->get(fn)` / `->block(5, fn)` | Atomic lock trên Redis, DB hoặc Memcached. `get` thử một lần, `block` chờ tối đa 5 giây | ⚠️ Lock có TTL (ở đây 10 giây). Việc chạy lâu hơn TTL thì người khác lấy được lock |
+| `Cache::lock('key', 10)->get(fn)` / `->block(5, fn)` | Atomic lock trên Redis, Memcached, DB, DynamoDB (driver `file` chỉ trong một máy, `array` chỉ trong một process). `get` thử một lần, `block` chờ tối đa 5 giây | ⚠️ Lock có TTL (ở đây 10 giây). Việc chạy lâu hơn TTL thì người khác lấy được lock |
 | Job `ShouldBeUnique` | Không cho dispatch job trùng key khi đã có một job như vậy **nằm trong queue**. Khoá giữ tới khi job chạy xong | Chỉ chặn lúc dispatch, không phải exactly-once. Job vẫn phải idempotent |
 | Job `ShouldBeUniqueUntilProcessing` | Như trên, nhưng nhả khoá ngay khi job **bắt đầu chạy** | Job mới cùng key vào queue được trong lúc job cũ đang chạy |
 | Job middleware `WithoutOverlapping` | Không cho hai job cùng key **chạy song song** | Không chặn việc dispatch trùng |
 | Scheduler `withoutOverlapping()`, `onOneServer()` | Lệnh lịch không chạy chồng, và chỉ chạy trên một server khi có nhiều server | `onOneServer()` cần cache driver dùng chung, ví dụ Redis |
-| `DB::transaction($fn, 3)` | Tự retry tối đa 3 lần khi gặp deadlock | Closure phải chạy lại được an toàn |
+| `DB::transaction($fn, 3)` | Chạy closure tổng cộng tối đa 3 lần (tức retry 2 lần) khi gặp deadlock. Mặc định 1, không retry | Closure phải chạy lại được an toàn |
 | `afterCommit` | Job dispatch trong transaction chỉ vào queue sau khi transaction commit | Không dùng thì worker có thể chạy job trước khi dữ liệu được commit |
 
 - Ví dụ `Cache::lock`:
@@ -825,11 +835,12 @@ công cụ chống race; biết dùng đúng cái nào cho việc nào là đi�
   ```
 
 *Session và file*
-- ⚠️ Session lưu bằng file có khoá. Nhiều request AJAX cùng một session bị chạy **tuần tự**, request
-  này chờ request kia nhả file session.
+- ⚠️ Session gốc của PHP (`session_start()`, handler `files`) có khoá. Nhiều request AJAX cùng
+  một session bị chạy **tuần tự**, request này chờ request kia nhả file session.
   - Gọi `session_write_close()` sớm khi không cần ghi session nữa.
-  - Chuyển session sang Redis thì hết khoá, nhưng lỗi đổi thành lost update trên session: hai
-    request cùng ghi, bản sau đè bản trước.
+- ⚠️ Session của Laravel thì ngược lại: mặc định **không** khoá, các request cùng session chạy đồng
+  thời. Hai request cùng ghi session thì bản sau đè bản trước (lost update).
+  - Cần xếp hàng thì dùng route `->block()` (session blocking, cần cache driver hỗ trợ atomic lock).
 - `flock()` khoá file, nhưng chỉ chống race trên **một máy**. Hai server thì mỗi server một file.
 
 *Octane: khi PHP có state dùng chung*
@@ -976,9 +987,10 @@ DB: optimistic lock so sánh sai cột sẽ gặp đúng lỗi này. Câu "CAS l
 *Ví dụ thực tế trong Java*
 - `ConcurrentLinkedQueue`: queue lock-free.
 - `LongAdder`: bộ đếm chia thành nhiều ô, mỗi thread cộng vào một ô khác nhau, đọc thì cộng các ô
-  lại. Ít tranh chấp hơn `AtomicLong`, nơi mọi thread CAS cùng một biến.
-- ⚠️ Lock-free khó viết đúng, và không nhất thiết nhanh hơn lock khi tranh chấp thấp. Backend chỉ
-  cần biết dùng thư viện có sẵn.
+  lại. Ít tranh chấp hơn `AtomicLong`, nơi mọi thread cập nhật atomic cùng một biến (cùng cache line).
+- ⚠️ Lock-free khó viết đúng, và không phải lúc nào cũng nhanh hơn lock. Ở tranh chấp thấp tới vừa
+  (mức thực tế) atomic thường thắng; khi tranh chấp **rất cao**, lock có thể thắng vì thread chờ
+  được cho ngủ thay vì CAS thất bại liên tục (JCIP 15.3.2). Backend chỉ cần biết dùng thư viện có sẵn.
 
 **Đọc**
 - *Java Concurrency in Practice*: ch.15
@@ -1034,7 +1046,7 @@ một writer" loại bỏ được tranh chấp.
   - SQS FIFO message group: các message cùng group được xử lý lần lượt.
 
 **Đọc**
-- [What really happened on Mars?](https://www.cs.cornell.edu/courses/cs614/1999sp/papers/pathfinder.html) (Glenn Reeves)
+- [What really happened on Mars?](https://www.cs.cornell.edu/courses/cs614/1999sp/papers/pathfinder.html) (email của Mike Jones kể lại keynote của David Wilner, Wind River)
 - Microsoft: [Bulkhead pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/bulkhead)
 
 **Nắm chắc khi**
@@ -1099,10 +1111,13 @@ hay gặp.
   nhớ và báo data race.
   - ⚠️ Chỉ bắt race **thực sự chạy qua** trong lần chạy đó. Đoạn code không được chạy tới thì không
     được kiểm tra.
-- `testing/synctest` (GA ở Go 1.25): chạy test trong một "bubble" có đồng hồ ảo.
+- `testing/synctest` (GA ở Go 1.25, API `synctest.Test`; `synctest.Run` chỉ là bản experiment ở
+  Go 1.24): chạy test trong một "bubble" có đồng hồ ảo.
   - Code có timeout hay `time.Sleep` chạy ngay lập tức theo đồng hồ ảo, nên test không chậm và không
     flaky.
-- Go 1.26 có goroutine leak profile ở dạng experiment.
+  - Go 1.27 thêm `synctest.Sleep` (tương đương `time.Sleep` rồi `synctest.Wait`).
+- Goroutine leak profile: experiment ở Go 1.26, GA ở Go 1.27 (profile `goroutineleak`, không cần
+  `GOEXPERIMENT` nữa).
 - Điều tra: `pprof` goroutine profile, hoặc gửi `SIGQUIT` để in stack của mọi goroutine.
 
 *Java*
@@ -1121,6 +1136,8 @@ hay gặp.
 - Bắn nhiều request song song vào cùng một endpoint:
   - `xargs -P` chạy nhiều `curl` song song.
   - `ab` hoặc `k6` cho tải lớn hơn.
+- ⚠️ `php artisan serve` mặc định chỉ một worker, request chạy tuần tự nên không tái hiện được race.
+  Chạy `PHP_CLI_SERVER_WORKERS=8 php artisan serve --no-reload`, hoặc dùng PHP-FPM thật.
 - Test tích hợp mở hai transaction, cho chúng chạy xen kẽ theo đúng thứ tự gây lỗi.
 
   ```bash
@@ -1160,7 +1177,7 @@ Cách dùng: tự trả lời thành tiếng trước, sau đó mới đối chi
 - Red flag: chỉ nêu ví dụ thread trong bộ nhớ, không nghĩ tới DB
 
 **3. Mutex và semaphore khác nhau thế nào?** (1.2)
-- Ý phải có: một người giữ so với N permit; mutex có chủ sở hữu
+- Ý phải có: một người giữ so với N permit; mutex thường có chủ sở hữu (Java; Go `sync.Mutex` thì không gắn goroutine)
 - Điểm cộng: ví dụ semaphore giới hạn lời gọi API ngoài; buffered channel trong Go
 
 **4. Deadlock là gì? Ví dụ trong database và cách tránh.** (1.3)
@@ -1169,7 +1186,7 @@ Cách dùng: tự trả lời thành tiếng trước, sau đó mới đối chi
 
 **5. PHP có race condition không?** (2.7)
 - Ý phải có: không có data race vì FPM share-nothing, nhưng race condition ở DB/Redis/file/session đầy vì nhiều process chạy song song
-- Điểm cộng: Octane/Swoole đưa state dùng chung trở lại; session file lock làm AJAX chạy tuần tự
+- Điểm cộng: Octane/Swoole đưa state dùng chung trở lại; session gốc PHP (file) khoá làm AJAX chạy tuần tự, session Laravel mặc định không khoá nên dễ lost update
 - Red flag: "Không, PHP không có thread"
 
 **6. Check-then-act là gì, sửa thế nào?** (1.4)

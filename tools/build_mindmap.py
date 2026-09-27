@@ -121,6 +121,10 @@ def parse_file(path: Path) -> dict:
     for mod in node["children"]:
         mod["why"] = inline_md(mod["why"].strip())
     node["questions"] = questions
+    kpath = ROOT / "kien-thuc" / path.name
+    node["knowledge"] = f"kien-thuc/{path.name}" if kpath.exists() else ""
+    for mod in node["children"]:
+        mod["knowledge"] = node["knowledge"]
     return node
 
 
@@ -480,7 +484,8 @@ function showPanel(m) {
       <div class="progress"><div style="width:${done / total * 100}%"></div></div>
       ${m.checks.map((c, i) => `<label><input type="checkbox" data-i="${i}" ${saved[i] ? "checked" : ""}><span>${c}</span></label>`).join("")}` : ""}
     <h3>Học chi tiết</h3>
-    <p><a href="${encodeURI(m.file)}" target="_blank" rel="noopener">Mở ${esc(m.file)}</a>, tìm module “${esc(m.label)}”.</p>`;
+    <p><a href="${encodeURI(m.file)}" target="_blank" rel="noopener">Mở plan ${esc(m.file)}</a>, tìm module “${esc(m.label)}”.</p>
+    ${m.knowledge ? `<p><a href="${encodeURI(m.knowledge)}" target="_blank" rel="noopener">📖 Mở bài đọc kiến thức</a>, mục “${esc(m.label)}”.</p>` : ""}`;
   panel.classList.add("open");
   panel.querySelector(".close").onclick = () => { panel.classList.remove("open"); render(); };
   panel.querySelectorAll("input[type=checkbox]").forEach(cb => cb.onchange = () => {
