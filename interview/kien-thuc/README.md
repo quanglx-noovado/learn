@@ -15,12 +15,25 @@ file plan. Mục đích là để bạn không phải mở hàng chục link khi
 3. **Quay lại file plan**, tick các tiêu chí "Nắm chắc khi", rồi tự trả lời Phần 2 (câu hỏi).
 4. Chỗ nào muốn hiểu sâu hơn thì mở link ở mục "Nguồn" cuối mỗi module.
 
-## Danh sách
+## Giáo trình (từ cơ bản tới nâng cao)
+
+Viết như sách cho người chưa biết gì về chủ đề: mỗi chương đi từ "là gì, để làm gì" tới cơ chế bên
+trong, có ví dụ chạy được, lỗi thường gặp, câu hỏi tự kiểm tra và bài tập. Mỗi chương đã qua một
+lượt review độc lập đối chiếu tài liệu gốc.
+
+| Giáo trình | File plan |
+|---|---|
+| [PHP và Laravel](php/README.md) (30 chương) | [05-php-laravel.md](../05-php-laravel.md) |
+| [Database quan hệ](database/README.md) (đang viết) | [03-database-sql.md](../03-database-sql.md) |
+
+## Bài đọc tổng hợp theo module
+
+Bản ngắn hơn, bám theo thứ tự module của plan, hợp để ôn lại.
 
 | File kiến thức | File plan |
 |---|---|
 | [03. Database quan hệ và SQL](03-database-sql.md) | [03-database-sql.md](../03-database-sql.md) |
-| [05. PHP và Laravel](05-php-laravel.md) | [05-php-laravel.md](../05-php-laravel.md) |
+| [05. PHP và Laravel](05-php-laravel.md) (đã có giáo trình đầy đủ ở trên) | [05-php-laravel.md](../05-php-laravel.md) |
 | [09. Thiết kế API](09-api-design.md) | [09-api-design.md](../09-api-design.md) |
 | [10. Bảo mật](10-security.md) | [10-security.md](../10-security.md) |
 | [11. Cache](11-cache.md) | [11-cache.md](../11-cache.md) |

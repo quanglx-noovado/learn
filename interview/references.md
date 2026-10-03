@@ -3,7 +3,7 @@
 > [← Mục lục](README.md) · File này được **sinh tự động** từ các file bài học. Đừng sửa tay;
 > sửa ở file bài học rồi chạy `python3 tools/build_references.py`.
 
-Tổng hợp 1517 trang tài liệu từ 26 chủ đề. Dùng file này theo thứ tự:
+Tổng hợp 1518 trang tài liệu từ 26 chủ đề. Dùng file này theo thứ tự:
 
 1. **[Tài liệu nền theo chủ đề](#1-tài-liệu-nền-theo-chủ-đề)**: 4–8 nguồn chính của mỗi chủ đề. Bắt đầu từ đây.
 2. **[Sách](#2-sách)**: danh sách sách, gom từ mọi chủ đề.
@@ -178,10 +178,10 @@ Số trong ngoặc vuông, ví dụ [03], là file bài học dẫn tới tài l
 | Tài liệu | Loại | Dùng cho |
 |---|---|---|
 | [OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/) | Hướng dẫn thực hành | Nguồn tra cứu chính cho gần như mọi module. Mỗi cheat sheet ngắn, có khuyến nghị cụ thể |
-| [OWASP Top 10:2025](https://owasp.org/Top10/2025/) và [OWASP API Security Top 10 2023](https://owasp.org/API-Security/editions/2023/en/0x11-t10/) | Danh mục rủi ro | Khung để nói chuyện về lỗ hổng. Người phỏng vấn hay hỏi "kể tên" |
+| [OWASP Top 10:2025](https://owasp.org/Top10/2025/) và [OWASP API Security Top 10 2023](https://api-security.owasp.org/editions/2023/en/0x11-t10/) | Danh mục rủi ro | Khung để nói chuyện về lỗ hổng. Người phỏng vấn hay hỏi "kể tên" |
 | [PortSwigger Web Security Academy](https://portswigger.net/web-security) | Khoá học + lab miễn phí | Hiểu lỗ hổng bằng cách tự khai thác. **Làm lab** quan trọng hơn đọc lý thuyết |
 | [OWASP ASVS](https://github.com/OWASP/ASVS) | Tiêu chuẩn kiểm chứng | Checklist yêu cầu bảo mật theo cấp độ, dùng khi review thiết kế |
-| [NIST SP 800-63B-4](https://pages.nist.gov/800-63-4/sp800-63b.html) | Tiêu chuẩn | Password, MFA, authenticator, session (bản chính thức 08/2025) |
+| [NIST SP 800-63B-4](https://pages.nist.gov/800-63-4/sp800-63b.html) | Tiêu chuẩn | Password, MFA, authenticator, session (bản chính thức 07/2025) |
 | [RFC 9700: OAuth 2.0 Security BCP](https://www.rfc-editor.org/rfc/rfc9700) | RFC (01/2025) | Cách dùng OAuth 2.0 an toàn hiện nay. OAuth 2.1 vẫn là Internet-Draft |
 | *Serious Cryptography*, 2nd ed. (Jean-Philippe Aumasson; No Starch 2024) | Sách | Crypto cho kỹ sư: hash, AEAD, RSA/ECC, TLS. Đọc ch.1–4 và phần về authenticated encryption |
 | [Laravel docs](https://laravel.com/docs) và [PHP manual: Security](https://www.php.net/manual/en/security.php) | Official docs | Tầng framework: CSRF, auth, authorization, encryption, hashing |
@@ -407,7 +407,7 @@ Các trang được từ 3 chủ đề trở lên dẫn tới.
 | [Designing Data-Intensive Applications](https://dataintensive.net) | 8 | [03](03-database-sql.md) [04](04-nosql-search-storage.md) [11](11-cache.md) [12](12-messaging.md) [13](13-concurrency.md) [14](14-distributed-systems.md) [16](16-system-design.md) [17](17-performance.md) |
 | [Eloquent](https://laravel.com/docs/eloquent) | 8 | [03](03-database-sql.md) [05](05-php-laravel.md) [08](08-oop-design.md) [09](09-api-design.md) [10](10-security.md) [15](15-architecture.md) [17](17-performance.md) [22](22-practical-data.md) |
 | [Octane](https://laravel.com/docs/octane) | 7 | [01](01-os-linux.md) [05](05-php-laravel.md) [08](08-oop-design.md) [13](13-concurrency.md) [15](15-architecture.md) [17](17-performance.md) [19](19-devops-cloud.md) |
-| [Task Scheduling](https://laravel.com/docs/scheduling) | 7 | [01](01-os-linux.md) [05](05-php-laravel.md) [12](12-messaging.md) [16](16-system-design.md) [17](17-performance.md) [19](19-devops-cloud.md) [22](22-practical-data.md) |
+| [Scheduling](https://laravel.com/docs/scheduling) | 7 | [01](01-os-linux.md) [05](05-php-laravel.md) [12](12-messaging.md) [16](16-system-design.md) [17](17-performance.md) [19](19-devops-cloud.md) [22](22-practical-data.md) |
 | [Timeouts, retries, and backoff with jitter](https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter) | 6 | [02](02-networking.md) [09](09-api-design.md) [14](14-distributed-systems.md) [17](17-performance.md) [18](18-reliability-observability.md) [23](23-ai-llm-backend.md) |
 | [Deployment](https://laravel.com/docs/deployment) | 5 | [02](02-networking.md) [05](05-php-laravel.md) [17](17-performance.md) [18](18-reliability-observability.md) [19](19-devops-cloud.md) |
 | [HTTP Client](https://laravel.com/docs/http-client) | 5 | [05](05-php-laravel.md) [09](09-api-design.md) [17](17-performance.md) [20](20-testing-quality.md) [23](23-ai-llm-backend.md) |
@@ -1810,7 +1810,7 @@ Học chi tiết: [10-security.md](10-security.md)
 **1.5 Authentication, authorization và IDOR**
 
 - OWASP: [Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html), [IDOR Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Insecure_Direct_Object_Reference_Prevention_Cheat_Sheet.html)
-- OWASP API Top 10: [API1:2023 BOLA](https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/)
+- OWASP API Top 10: [API1:2023 BOLA](https://api-security.owasp.org/editions/2023/en/0xa1-broken-object-level-authorization/)
 - PortSwigger: [Access control](https://portswigger.net/web-security/access-control)
 
 **2.1 JWT**
@@ -1825,7 +1825,7 @@ Học chi tiết: [10-security.md](10-security.md)
 - [RFC 10017: OAuth 2.0 for Browser-Based Applications](https://www.rfc-editor.org/rfc/rfc10017): mục 5 (mối đe doạ từ JavaScript độc) và mục 6 (BFF, token-mediating backend, browser-based client)
 - RFC 9700: [mục 4.14 Refresh Token Protection](https://www.rfc-editor.org/rfc/rfc9700#section-4.14)
 - [Auth0: Refresh Token Rotation](https://auth0.com/docs/secure/tokens/refresh-tokens/refresh-token-rotation) (có mục reuse detection)
-- OWASP: [JSON Web Token Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_Cheat_Sheet.html): phần token sidejacking và revocation
+- OWASP: [JSON Web Token Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_Cheat_Sheet.html): phần threats on JWTs, revocation và replay protection
 
 **2.3 OAuth 2.0 và OIDC**
 
@@ -1855,7 +1855,7 @@ Học chi tiết: [10-security.md](10-security.md)
 **2.6 Lỗ hổng web và API theo OWASP**
 
 - [OWASP Top 10:2025](https://owasp.org/Top10/2025/): đọc trang giới thiệu (thay đổi so với 2021) và trang của A01, A03, A10
-- [OWASP API Security Top 10 2023](https://owasp.org/API-Security/editions/2023/en/0x11-t10/)
+- [OWASP API Security Top 10 2023](https://api-security.owasp.org/editions/2023/en/0x11-t10/)
 - OWASP cheat sheets: [SSRF](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html), [XXE](https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html), [Deserialization](https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html), [Mass Assignment](https://cheatsheetseries.owasp.org/cheatsheets/Mass_Assignment_Cheat_Sheet.html), [File Upload](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html), [OS Command Injection](https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html), [Unvalidated Redirects](https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html)
 - PortSwigger (làm lab): [SSRF](https://portswigger.net/web-security/ssrf), [XXE](https://portswigger.net/web-security/xxe), [Path traversal](https://portswigger.net/web-security/file-path-traversal), [OS command injection](https://portswigger.net/web-security/os-command-injection), [Insecure deserialization](https://portswigger.net/web-security/deserialization), [File upload](https://portswigger.net/web-security/file-upload)
 - PHP: [unserialize](https://www.php.net/manual/en/function.unserialize.php) (đọc khung cảnh báo), [escapeshellarg](https://www.php.net/manual/en/function.escapeshellarg.php)
@@ -1883,7 +1883,7 @@ Học chi tiết: [10-security.md](10-security.md)
 **2.9 Chống lạm dụng: rate limit, brute force, bot**
 
 - OWASP: [Credential Stuffing Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Credential_Stuffing_Prevention_Cheat_Sheet.html), [Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) (mục account lockout và error messages)
-- OWASP API Top 10: [API6:2023 Unrestricted Access to Sensitive Business Flows](https://owasp.org/API-Security/editions/2023/en/0xa6-unrestricted-access-to-sensitive-business-flows/)
+- OWASP API Top 10: [API6:2023 Unrestricted Access to Sensitive Business Flows](https://api-security.owasp.org/editions/2023/en/0xa6-unrestricted-access-to-sensitive-business-flows/)
 - Laravel: [Rate Limiting](https://laravel.com/docs/rate-limiting)
 
 **3.1 OAuth nâng cao: token gắn người giữ, PAR, SSO**
@@ -1919,7 +1919,7 @@ Học chi tiết: [10-security.md](10-security.md)
 **3.5 Dữ liệu cá nhân và pháp lý**
 
 - OWASP: [Logging Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html) (mục data to exclude)
-- [Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15](https://chinhphu.vn/?pageid=27160&docid=214590&classid=1&typegroupid=3): lướt mục lục, đọc chương về quyền của chủ thể dữ liệu
+- [Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15](https://chinhphu.vn/?pageid=27160&docid=214590&classid=1&typegroupid=3): lướt mục lục, đọc Điều 4 (quyền và nghĩa vụ của chủ thể dữ liệu, trong Chương I)
 - [GDPR: Art. 17 Right to erasure](https://gdpr-info.eu/art-17-gdpr/) và [Art. 33 Notification of breach](https://gdpr-info.eu/art-33-gdpr/)
 
 **3.6 Nguyên tắc, threat modeling, phát hiện**
@@ -2151,7 +2151,7 @@ Học chi tiết: [13-concurrency.md](13-concurrency.md)
 
 **3.3 Priority inversion, bulkhead, actor model**
 
-- [What really happened on Mars?](https://www.cs.cornell.edu/courses/cs614/1999sp/papers/pathfinder.html) (Glenn Reeves)
+- [What really happened on Mars?](https://www.cs.cornell.edu/courses/cs614/1999sp/papers/pathfinder.html) (email của Mike Jones kể lại keynote của David Wilner, Wind River)
 - Microsoft: [Bulkhead pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/bulkhead)
 
 **3.4 Tranh chấp cực cao: flash sale, hot row**

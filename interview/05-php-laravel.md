@@ -1,14 +1,20 @@
 # 05. PHP và Laravel
 
-> [← Mục lục](README.md) · **[📖 Bài đọc kiến thức](kien-thuc/05-php-laravel.md)** · Trọng tâm: **PHP 8.4–8.5** (runtime Zend Engine, OPcache, PHP-FPM, GC), Composer/PSR, **Laravel 12–13** từ lifecycle tới queue/Octane, chất lượng code, hiệu năng, bảo mật đặc thù PHP.
+> [← Mục lục](README.md) · **[📖 Giáo trình PHP và Laravel (30 chương)](kien-thuc/php/README.md)** · Trọng tâm: **PHP 8.4–8.5** (runtime Zend Engine, OPcache, PHP-FPM, GC), Composer/PSR, **Laravel 12–13** từ lifecycle tới queue/Octane, chất lượng code, hiệu năng, bảo mật đặc thù PHP.
 > Ký hiệu: 🟢 junior · 🟡 mid · 🔴 senior · ⚠️ cạm bẫy hay bị hỏi vặn.
 
 Nếu PHP/Laravel là ngôn ngữ chính trong CV, đây là file bị đào sâu nhất. Trả lời hời hợt ở
 đây bị trừ điểm nặng hơn nhiều so với không biết Go hay Java.
 
+Cách học: kiến thức đầy đủ từ cơ bản tới nâng cao nằm trong
+[Giáo trình PHP và Laravel](kien-thuc/php/README.md) (30 chương, có ví dụ chạy được, câu hỏi tự
+kiểm tra và bài tập). File này là bản đồ ôn tập: mỗi module ghi rõ chương giáo trình cần đọc, rồi
+dùng tiêu chí "Nắm chắc khi" và Phần 2 để tự kiểm tra.
+
 File gồm hai phần:
 
 1. **Lộ trình kiến thức** (phần chính): ba chặng từ nền tới senior. Mỗi module có:
+   - **Giáo trình**: các chương cần đọc trong giáo trình.
    - **Vì sao cần học**: module này dùng vào việc gì và hay bị hỏi thế nào.
    - **Học gì**: các khái niệm, giải thích bằng lời thường kèm ví dụ, và các cạm bẫy ⚠️. Đọc phần
      này để biết cần học gì, rồi học sâu qua tài liệu ở mục Đọc.
@@ -61,6 +67,8 @@ leak. Mỗi tầng giải thích tầng phía trên.
 
 #### 1.1 Type system và so sánh
 
+📖 **Giáo trình:** [Chương 04. Kiểu dữ liệu và hệ thống kiểu](kien-thuc/php/04-kieu-du-lieu.md), [Chương 07. Toán tử và cấu trúc điều khiển](kien-thuc/php/07-toan-tu-dieu-khien.md)
+
 **Vì sao cần học:** Rất nhiều bug PHP kiểu "kiểm tra quyền bị qua mặt", "token sai vẫn khớp",
 "trạng thái đơn so sai" bắt nguồn từ việc PHP tự đổi kiểu khi so sánh. Đây gần như luôn là câu
 mở màn của phỏng vấn PHP: hỏi `==` và `===`, rồi hỏi tiếp PHP 8 đã đổi gì và `strict_types` có
@@ -85,7 +93,8 @@ cứu được không.
     implement cả hai interface `Countable&Traversable`.
   - *DNF type* `(A&B)|null` (8.2): viết tắt của *Disjunctive Normal Form*, tức "hợp của các
     intersection". Dùng khi cần "vừa A vừa B, hoặc là null".
-  - `null`, `false`, `true` đứng riêng làm kiểu được từ 8.2, ví dụ hàm trả `string|false`.
+  - `null` và `false` đứng riêng làm kiểu được từ 8.2, ví dụ `function f(): false` (trước đó chỉ
+    dùng trong union như `string|false`, có từ 8.0). Kiểu `true` cũng có từ 8.2.
 - ⚠️ *Implicit nullable*: viết `function f(Foo $x = null)` thì PHP ngầm hiểu `$x` nhận được
   `null`. Cách viết này bị deprecated từ 8.4. Viết tường minh `?Foo $x = null`.
 
@@ -158,6 +167,8 @@ cứu được không.
 
 #### 1.2 Array, reference và object handle
 
+📖 **Giáo trình:** [Chương 06. Mảng (array)](kien-thuc/php/06-mang.md), [Chương 08. Hàm](kien-thuc/php/08-ham.md), [Chương 09. OOP cơ bản: class và object](kien-thuc/php/09-oop-co-ban.md)
+
 **Vì sao cần học:** Array là cấu trúc dữ liệu dùng nhiều nhất trong PHP: kết quả query, payload
 JSON, config đều là array. Hiểu sai cách array được copy và cách reference hoạt động dẫn tới bug
 khó thấy (bẫy `foreach` by reference) và "tối ưu" ngược. Đây cũng là bậc đầu tiên để người
@@ -189,7 +200,7 @@ phỏng vấn đào xuống copy-on-write và refcount ở module 3.1.
   array_merge([5 => 'x'], [5 => 'y']);  // [0 => 'x', 1 => 'y']
   [5 => 'x'] + [5 => 'y'];              // [5 => 'x']
   ```
-- `array_is_list($a)` (8.1) kiểm tra array có phải list (key 0..n liên tục) không. Có ích khi
+- `array_is_list($a)` (8.1) kiểm tra array có phải list (key đúng là 0, 1, ..., count-1 theo thứ tự) không. Có ích khi
   quyết định encode JSON ra `[]` hay `{}`.
 
 *Gán giá trị: array copy, object là handle*
@@ -228,8 +239,9 @@ phỏng vấn đào xuống copy-on-write và refcount ở module 3.1.
 - Object không cần `&` để sửa nội dung, vì handle đã trỏ tới cùng object rồi.
 
 *Chi phí bộ nhớ*
-- Mỗi phần tử array PHP tốn nhiều RAM hơn hẳn mảng C hay Java, vì phải lưu key, hash và thông
-  tin kiểu cho từng phần tử.
+- Mỗi phần tử array PHP tốn nhiều RAM hơn mảng C: mỗi phần tử là một zval 16 byte (có thông tin
+  kiểu). Array dạng hash còn phải lưu key và hash cho từng phần tử; *packed array* (key 0, 1, 2...
+  theo thứ tự) từ PHP 8.2 chỉ lưu zval, không lưu key và hash.
 - Dữ liệu cỡ triệu dòng:
   - Dùng *generator* (hàm `yield` từng phần tử thay vì trả cả array, module 2.1).
   - Hoặc `SplFixedArray` (mảng cố định kích thước, chỉ key số).
@@ -245,6 +257,8 @@ phỏng vấn đào xuống copy-on-write và refcount ở module 3.1.
 
 #### 1.3 OOP trong PHP
 
+📖 **Giáo trình:** [Chương 09. OOP cơ bản: class và object](kien-thuc/php/09-oop-co-ban.md), [Chương 10. OOP nâng cao và các tính năng hiện đại](kien-thuc/php/10-oop-nang-cao.md)
+
 **Vì sao cần học:** Laravel dựa rất nhiều vào những tính năng OOP riêng của PHP: trait,
 `static::`, magic method, closure. Không hiểu chúng thì đọc source Laravel như đọc phép thuật, và
 không trả lời được câu "`User::where()` gọi được dù `where` không phải static method là vì sao".
@@ -256,8 +270,8 @@ không trả lời được câu "`User::where()` gọi được dù `where` kh�
 | | Interface | Abstract class | Trait |
 |---|---|---|---|
 | Là gì | Hợp đồng: danh sách method phải có | Class dở dang, không `new` được | Khối code được chép vào class |
-| Có state (property) | Không, chỉ có hằng | Có | Có |
-| Có constructor | Không | Có | Có thể có, nhưng hiếm khi nên |
+| Có state (property) | Không lưu state; có hằng, và từ 8.4 khai báo được property (kèm hook) mà class phải hiện thực | Có | Có |
+| Có constructor | Khai báo được chữ ký nhưng không nên | Có | Có thể có, nhưng hiếm khi nên |
 | Là một type (`instanceof`, type hint) | Có | Có | **Không** |
 | Một class dùng được mấy cái | Nhiều | Một (kế thừa đơn) | Nhiều |
 
@@ -341,6 +355,8 @@ không trả lời được câu "`User::where()` gọi được dù `where` kh�
 
 #### 1.4 Exception và xử lý lỗi
 
+📖 **Giáo trình:** [Chương 12. Lỗi và exception](kien-thuc/php/12-loi-exception.md)
+
 **Vì sao cần học:** Bắt exception sai tầng hoặc bắt sai loại là nguồn của các bug "job chết im
 lặng", "lỗi bị nuốt, log không có gì". Người phỏng vấn hay hỏi `Exception` khác `Error` thế nào,
 và nhờ đó biết bạn có hiểu cây `Throwable` của PHP 7+ không.
@@ -411,6 +427,8 @@ và nhờ đó biết bạn có hiểu cây `Throwable` của PHP 7+ không.
 - [ ] Giải thích được vì sao job Laravel "chết im lặng" khi code chỉ `catch (Exception)`
 
 #### 1.5 Composer và PSR
+
+📖 **Giáo trình:** [Chương 11. Namespace, autoload và Composer](kien-thuc/php/11-namespace-composer.md), [Chương 21. Chất lượng code: test, phân tích tĩnh, chuẩn code](kien-thuc/php/21-chat-luong-code.md)
 
 **Vì sao cần học:** Mọi project PHP hiện đại đều đứng trên Composer. Lỗi deploy kiểu "máy dev
 chạy, production vỡ" rất hay đến từ việc không commit `composer.lock` hoặc chạy nhầm `update`.
@@ -492,6 +510,8 @@ Người phỏng vấn thường hỏi `install` khác `update`, class được 
 - [ ] Viết đúng ràng buộc cho "nhận mọi bản 2.x từ 2.4 trở lên"
 
 #### 1.6 Laravel cơ bản
+
+📖 **Giáo trình:** [Chương 23. Laravel: giới thiệu và cấu trúc dự án](kien-thuc/php/23-laravel-gioi-thieu.md), [Chương 24. Routing, controller và middleware](kien-thuc/php/24-laravel-routing-controller-middleware.md), [Chương 25. Request, validation, response và view](kien-thuc/php/25-laravel-request-validation-response.md)
 
 **Vì sao cần học:** Đây là phần dùng hằng ngày, nhưng cũng là nơi có những lỗ hổng bảo mật phổ
 biến nhất của app Laravel: mass assignment, IDOR, validation có race condition. Câu hỏi phỏng vấn
@@ -582,6 +602,8 @@ biến nhất của app Laravel: mass assignment, IDOR, validation có race cond
 ### Chặng 2: Làm chủ 🟡
 
 #### 2.1 PHP hiện đại: 8.0 tới 8.5
+
+📖 **Giáo trình:** [Chương 22. Tổng hợp PHP 8.0 tới 8.5](kien-thuc/php/22-phien-ban-moi.md)
 
 **Vì sao cần học:** Codebase PHP thật thường kẹt ở 7.x hoặc 8.0 và cần nâng cấp. Người phỏng vấn
 muốn biết bạn theo kịp ngôn ngữ, biết tính năng nào giải bài toán gì, và biết cái gì sẽ vỡ khi
@@ -693,6 +715,8 @@ nâng bản. Kể được tính năng của 8.4/8.5 kèm ví dụ dùng thật 
 
 #### 2.2 PHP-FPM và mô hình share-nothing
 
+📖 **Giáo trình:** [Chương 02. PHP chạy như thế nào](kien-thuc/php/02-php-chay-nhu-the-nao.md), [Chương 18. PHP-FPM, Nginx và OPcache trên production](kien-thuc/php/18-fpm-nginx-opcache.md)
+
 **Vì sao cần học:** Gần như mọi app PHP production chạy sau PHP-FPM. Sự cố "502/504 lúc cao điểm",
 "server swap", "request treo không bị cắt" đều nằm ở tầng này. Người phỏng vấn hỏi cách tính
 `pm.max_children` để xem bạn đã từng vận hành thật hay chỉ viết code.
@@ -740,6 +764,9 @@ nâng bản. Kể được tính năng của 8.4/8.5 kèm ví dụ dùng thật 
   1. Lấy tổng RAM trừ phần của OS, Nginx, Redis... để ra RAM dành cho PHP.
   2. Đo RSS thật của worker lúc tải cao bằng `ps`, không đo lúc rảnh.
   3. Chia, rồi để dư biên. Ví dụ còn 6 GB, worker 60 MB thì khoảng 100.
+- RSS đếm cả trang nhớ dùng chung giữa các worker (OPcache, thư viện) vào từng worker, nên chia
+  theo RSS cho kết quả thấp hơn thực tế (an toàn nhưng lãng phí). Đo chính xác hơn bằng PSS hoặc
+  USS (ví dụ `smem`), xem giáo trình chương 18.
 - ⚠️ Không lấy `memory_limit` để chia. `memory_limit` là **trần** mỗi request, không phải mức dùng
   thật.
 - ⚠️ Đặt quá cao: hết RAM, máy swap (đẩy RAM xuống đĩa, chậm hẳn), rồi *OOM killer* của Linux giết
@@ -780,6 +807,8 @@ nâng bản. Kể được tính năng của 8.4/8.5 kèm ví dụ dùng thật 
 
 #### 2.3 OPcache và deploy
 
+📖 **Giáo trình:** [Chương 18. PHP-FPM, Nginx và OPcache trên production](kien-thuc/php/18-fpm-nginx-opcache.md), [Chương 30. Laravel: kiểm thử, Octane và triển khai](kien-thuc/php/30-laravel-testing-octane-deploy.md)
+
 **Vì sao cần học:** OPcache là lý do PHP đủ nhanh cho production, và cũng là thủ phạm quen thuộc
 của sự cố "deploy xong vẫn chạy code cũ". Câu hỏi hay gặp: OPcache làm gì, vì sao sau deploy phải
 reload FPM, vì sao `env()` trả `null`.
@@ -810,13 +839,15 @@ reload FPM, vì sao `env()` trả `null`.
   - `opcache.interned_strings_buffer`: dung lượng cho chuỗi dùng chung (module 3.1).
   - `opcache.max_accelerated_files`: số file tối đa.
   - Một trong ba cái đầy thì file mới không được cache, hit rate tụt, app chậm dần mà không có lỗi
-    rõ ràng. Theo dõi bằng `opcache_get_status()`.
+    rõ ràng. Riêng khi bộ nhớ bị lãng phí (wasted) vượt `opcache.max_wasted_percentage` thì OPcache
+    lên lịch restart, xoá sạch cache. Theo dõi bằng `opcache_get_status()`.
 
 *Deploy kiểu symlink và realpath cache*
 - Deploy kiểu *symlink swap*: mỗi bản code nằm ở `releases/123`, và `current` là symlink trỏ tới
   bản mới nhất. Deploy là đổi symlink.
 - ⚠️ Đổi symlink mà không reload FPM thì vẫn chạy code cũ, vì:
-  - OPcache lưu theo đường dẫn thật đã resolve (`releases/122/...`).
+  - OPcache vẫn giữ key theo đường dẫn symlink (`current/...`) trỏ tới bản biên dịch của release
+    cũ; với `validate_timestamps=0` key này không bao giờ bị kiểm lại.
   - *Realpath cache* của PHP (bộ nhớ đệm "symlink này trỏ tới đâu") vẫn nhớ đích cũ.
 - Cách xử lý: reload FPM sau khi đổi symlink, hoặc cấu hình Nginx truyền `$realpath_root` thay vì
   `$document_root` để PHP nhận đường dẫn thật của bản mới.
@@ -828,7 +859,7 @@ reload FPM, vì sao `env()` trả `null`.
    request.
 3. `php artisan migrate --force` (`--force` vì production mặc định hỏi xác nhận).
 4. Reload FPM để xoá OPcache.
-5. `php artisan queue:restart` để queue worker nạp code mới. Laravel 13 có `php artisan reload`
+5. `php artisan queue:restart` để queue worker nạp code mới. Từ Laravel 12.x có `php artisan reload`
    gộp sẵn `queue:restart`, `schedule:interrupt` và lệnh reload của các package.
 
 - ⚠️ Sau `config:cache`, file `.env` không được đọc nữa. `env()` gọi ở bất kỳ đâu ngoài
@@ -850,6 +881,8 @@ reload FPM, vì sao `env()` trả `null`.
 - [ ] Đọc được output `opcache_get_status()` và nói cache đã đầy chưa
 
 #### 2.4 Lõi Laravel: lifecycle, container, provider, facade
+
+📖 **Giáo trình:** [Chương 26. Service container, provider, facade và vòng đời request](kien-thuc/php/26-laravel-container-provider-facade.md)
 
 **Vì sao cần học:** Service container là trái tim của Laravel: mọi thứ từ controller, facade tới
 queue job đều đi qua nó. Người phỏng vấn senior Laravel gần như chắc chắn hỏi "container resolve
@@ -890,7 +923,7 @@ một class thế nào", "facade hoạt động ra sao bên dưới", và "`regi
   | Cách | Mỗi lần resolve | Vòng đời instance |
   |---|---|---|
   | `bind` | Tạo mới | Không giữ |
-  | `singleton` | Dùng lại một instance | Cả vòng đời app: FPM là một request, Octane/queue worker là **cả process** |
+  | `singleton` | Dùng lại một instance | Cả vòng đời app: FPM là một request; queue worker là **cả process**; Octane là cả process nếu tạo lúc boot (hoặc trong `warm`), còn tạo trong request thì bị bỏ cùng bản clone sau request |
   | `scoped` | Dùng lại trong một request/job | Được xoá giữa các request Octane và giữa các job |
   | `instance` | Trả object có sẵn đã đăng ký | Như singleton |
 
@@ -995,6 +1028,8 @@ một class thế nào", "facade hoạt động ra sao bên dưới", và "`regi
 
 #### 2.5 Eloquent ở mức làm chủ
 
+📖 **Giáo trình:** [Chương 27. Database trong Laravel: migration, query builder, Eloquent](kien-thuc/php/27-laravel-database-eloquent.md)
+
 **Vì sao cần học:** Eloquent là nơi code Laravel dành nhiều thời gian nhất, và cũng là nơi có
 nhiều hành vi ngầm nhất: event không bắn, scope lọc mất dữ liệu, accessor gây N+1. Người phỏng vấn
 hay đưa một tình huống "observer không chạy" hoặc "báo cáo thiếu dữ liệu" để xem bạn biết Eloquent
@@ -1093,6 +1128,8 @@ chỉ bổ sung phần thuộc về model.
 
 #### 2.6 Queue
 
+📖 **Giáo trình:** [Chương 29. Queue, event, scheduler, cache, mail và notification](kien-thuc/php/29-laravel-queue-event-schedule-cache.md)
+
 **Vì sao cần học:** Mọi việc chậm hoặc có thể lỗi (gửi email, gọi API đối tác, xử lý file) đều
 nên đưa vào queue. Queue cũng là nơi sinh ra các bug khó nhất: job chạy hai lần, job chết không
 ai biết, worker chạy code cũ. Người phỏng vấn rất hay hỏi quan hệ giữa `retry_after` và `timeout`.
@@ -1178,7 +1215,7 @@ ai biết, worker chạy code cũ. Người phỏng vấn rất hay hỏi quan h
     để lọc job.
   - Deploy bằng `horizon:terminate`.
 - `queue:restart` không kill worker ngay. Nó ghi một timestamp vào **cache**; mỗi worker kiểm
-  timestamp sau mỗi job và tự thoát êm nếu thấy mới hơn lúc nó khởi động.
+  timestamp ở cuối mỗi vòng lặp (sau mỗi job, cả khi queue rỗng) và tự thoát êm nếu thấy mới hơn lúc nó khởi động.
   - ⚠️ Cần cache dùng chung giữa các server (Redis, không phải `file`), và cần *process manager*
     (supervisor, systemd, Kubernetes) để khởi động worker lại sau khi nó thoát.
 - *Supervisor* (chương trình quản lý process trên Linux): `numprocs` (số worker), `autorestart`.
@@ -1195,6 +1232,8 @@ ai biết, worker chạy code cũ. Người phỏng vấn rất hay hỏi quan h
 - [ ] Viết được cấu hình supervisor cho worker và giải thích `stopwaitsecs`
 
 #### 2.7 Các thành phần khác của Laravel
+
+📖 **Giáo trình:** [Chương 28. Xác thực và phân quyền trong Laravel](kien-thuc/php/28-laravel-auth.md), [Chương 29. Queue, event, scheduler, cache, mail và notification](kien-thuc/php/29-laravel-queue-event-schedule-cache.md)
 
 **Vì sao cần học:** Scheduler, cache, event, auth là những phần gần như app nào cũng dùng, và lỗi
 của chúng chỉ lộ ra khi scale lên nhiều server: task chạy ba lần, session mất, cache stampede.
@@ -1283,6 +1322,8 @@ Người phỏng vấn thường hỏi theo kiểu tình huống "sau khi thêm 
 
 #### 2.8 Chất lượng code PHP: PHPStan, Rector, Pint
 
+📖 **Giáo trình:** [Chương 21. Chất lượng code: test, phân tích tĩnh, chuẩn code](kien-thuc/php/21-chat-luong-code.md)
+
 **Vì sao cần học:** PHP không có bước compile kiểm kiểu, nên lỗi kiểu chỉ lộ ra khi code chạy tới,
 thường là trên production. Static analysis và formatter là cách team PHP giữ chất lượng khi
 codebase lớn. Câu hỏi hay gặp: "đưa PHPStan vào codebase cũ thế nào mà không bắt cả team dừng lại".
@@ -1345,6 +1386,8 @@ codebase lớn. Câu hỏi hay gặp: "đưa PHPStan vào codebase cũ thế nà
 ### Chặng 3: Senior 🔴
 
 #### 3.1 Bên trong Zend Engine: zval, refcount, copy-on-write
+
+📖 **Giáo trình:** [Chương 19. Bên trong Zend Engine](kien-thuc/php/19-ben-trong-engine.md)
 
 **Vì sao cần học:** Đây là tầng người phỏng vấn senior PHP hay đào tới: "array được copy khi nào",
 "vì sao `&` không làm nhanh hơn", "vì sao gán array 100 MB mà RAM không tăng". Hiểu zval và
@@ -1447,6 +1490,8 @@ process sống lâu (3.5).
 
 #### 3.2 Bộ nhớ và garbage collection
 
+📖 **Giáo trình:** [Chương 19. Bên trong Zend Engine](kien-thuc/php/19-ben-trong-engine.md)
+
 **Vì sao cần học:** PHP quản lý bộ nhớ khác hẳn Java và Go. Trong FPM điều này hầu như vô hình,
 nhưng trong queue worker hay Octane nó quyết định worker có leak hay không. Câu hỏi hay gặp: "PHP
 dọn vòng tham chiếu thế nào, so với GC của Java/Go".
@@ -1539,6 +1584,8 @@ dọn vòng tham chiếu thế nào, so với GC của Java/Go".
 
 #### 3.3 OPcache chuyên sâu, preloading, JIT
 
+📖 **Giáo trình:** [Chương 18. PHP-FPM, Nginx và OPcache trên production](kien-thuc/php/18-fpm-nginx-opcache.md), [Chương 19. Bên trong Zend Engine](kien-thuc/php/19-ben-trong-engine.md), [Chương 20. Hiệu năng và profiling](kien-thuc/php/20-hieu-nang.md)
+
 **Vì sao cần học:** Người phỏng vấn hay hỏi "PHP 8 có JIT rồi, sao app không nhanh hơn" để xem
 bạn phân biệt được các tầng tối ưu và biết đo trước khi bật. Preloading và JIT cũng có cái giá
 vận hành khi deploy mà nhiều người không để ý.
@@ -1614,6 +1661,8 @@ vận hành khi deploy mà nhiều người không để ý.
 
 #### 3.4 PHP-FPM ở mức vận hành
 
+📖 **Giáo trình:** [Chương 18. PHP-FPM, Nginx và OPcache trên production](kien-thuc/php/18-fpm-nginx-opcache.md)
+
 **Vì sao cần học:** Module 2.2 là cấu hình FPM. Module này là chẩn đoán khi FPM gặp sự cố trên
 production: 502 lúc cao điểm, timeout lệch nhau giữa các tầng, chạy FPM trên Kubernetes. Người
 phỏng vấn senior thường đưa một tình huống sự cố và hỏi bạn xem gì trước, sửa gì trước.
@@ -1677,6 +1726,8 @@ phỏng vấn senior thường đưa một tình huống sự cố và hỏi b�
 
 #### 3.5 Process sống lâu: queue worker, Octane, daemon
 
+📖 **Giáo trình:** [Chương 29. Queue, event, scheduler, cache, mail và notification](kien-thuc/php/29-laravel-queue-event-schedule-cache.md), [Chương 30. Laravel: kiểm thử, Octane và triển khai](kien-thuc/php/30-laravel-testing-octane-deploy.md), [Chương 13. Generator, iterator và SPL](kien-thuc/php/13-generator-iterator-spl.md)
+
 **Vì sao cần học:** Khi app lớn, PHP không còn chỉ chạy trong FPM: queue worker, Horizon, Octane,
 consumer Kafka đều là process sống hàng giờ tới hàng ngày. Ở đó các lợi thế của share-nothing mất
 đi, và bug kiểu "user A thấy dữ liệu user B" hay "worker RAM tăng tới OOM" xuất hiện. Đây là chủ
@@ -1724,11 +1775,12 @@ consumer Kafka đều là process sống hàng giờ tới hàng ngày. Ở đó
   ```php
   // AppServiceProvider::register()
   $this->app->singleton(ReportService::class, fn ($app) =>
-      new ReportService($app['request'])   // giữ Request của request ĐẦU TIÊN mãi mãi
+      new ReportService($app['request'])   // nếu resolve lúc boot: giữ mãi Request giả lúc boot
   );
   ```
-  - Singleton giữ `Request`, user đăng nhập, hoặc config lúc boot: request sau thấy dữ liệu request
-    trước.
+  - Singleton được resolve lúc boot (hoặc trong `warm`) mà giữ `Request`, user đăng nhập, hoặc config
+    lúc boot: mọi request sau thấy dữ liệu cũ. (Singleton resolve lần đầu trong request thì nằm ở bản
+    clone của app và bị bỏ sau request đó.)
   - Static property tăng mãi.
   - Inject container hoặc request vào constructor của singleton: giữ bản cũ.
   - Sửa: inject closure resolver (`fn () => $app['request']`), đăng ký bằng `scoped`, hoặc resolve
@@ -1759,6 +1811,8 @@ consumer Kafka đều là process sống hàng giờ tới hàng ngày. Ở đó
 - [ ] Mô tả được quy trình tìm leak của queue worker: đo, cô lập job, tìm gốc
 
 #### 3.6 Hiệu năng và profiling
+
+📖 **Giáo trình:** [Chương 20. Hiệu năng và profiling](kien-thuc/php/20-hieu-nang.md)
 
 **Vì sao cần học:** "Endpoint này chậm, bạn làm gì" là câu hỏi hiệu năng phổ biến nhất. Người phỏng
 vấn muốn nghe quy trình đo trước sửa sau, biết chọn công cụ nào, và xử lý được bài toán dữ liệu lớn
@@ -1832,6 +1886,8 @@ vấn muốn nghe quy trình đo trước sửa sau, biết chọn công cụ n�
 - [ ] Thiết kế được import CSV 5 triệu dòng chạy tiếp được khi lỗi giữa chừng
 
 #### 3.7 Bảo mật đặc thù PHP
+
+📖 **Giáo trình:** [Chương 17. Bảo mật ứng dụng PHP](kien-thuc/php/17-bao-mat.md), [Chương 15. PHP và HTTP: request, response, session, cookie, upload](kien-thuc/php/15-php-va-web.md)
 
 **Vì sao cần học:** PHP có những lỗ hổng mang đặc thù ngôn ngữ mà OWASP chung chung không nói kỹ:
 object injection qua `unserialize`, magic hash, include file theo input. Người phỏng vấn senior
@@ -1914,6 +1970,8 @@ thường hỏi "vì sao `unserialize` dữ liệu người dùng nguy hiểm" h
 - [ ] Rà được một cấu hình Nginx + upload và chỉ ra chỗ có thể chạy file PHP bị upload lên
 
 #### 3.8 So sánh kiến trúc: Laravel, Symfony và ngôn ngữ khác
+
+📖 **Giáo trình:** [Chương 02. PHP chạy như thế nào](kien-thuc/php/02-php-chay-nhu-the-nao.md), [Chương 26. Service container, provider, facade và vòng đời request](kien-thuc/php/26-laravel-container-provider-facade.md)
 
 **Vì sao cần học:** Câu "vì sao team chọn Laravel" hay "Laravel hay Symfony cho dự án này" kiểm tra
 bạn có nhìn được điểm mạnh và điểm yếu thật của công cụ mình dùng hằng ngày không. Đối chiếu với

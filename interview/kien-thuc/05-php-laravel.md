@@ -1003,7 +1003,9 @@ User::where('active', 1)
 
 Cùng mô hình đó, `Model::__isset()` gọi `offsetExists()`, nên `isset($user->name)` và
 `empty($user->name)` hoạt động đúng. Nếu một class có `__get` mà quên `__isset` thì `isset()` luôn
-`false` và `??` luôn rơi về giá trị mặc định: một bug hay gặp khi tự viết class kiểu "attribute bag".
+`false` và `empty()` luôn `true` (riêng `??` thì vẫn gọi thẳng `__get` khi không có `__isset`, nên
+cùng một property mà `isset` nói "không có" còn `??` lại lấy được giá trị): một bug hay gặp khi tự
+viết class kiểu "attribute bag".
 
 ⚠️ *Indirect modification*: `__get` trả về **bản copy** của giá trị, nên sửa trực tiếp một array lấy
 qua magic không có tác dụng:

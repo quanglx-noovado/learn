@@ -23,10 +23,11 @@ Mỗi file chủ đề có hai phần:
 
 Cuối mỗi file có **bài tập tự làm**. Nộp bài để được review.
 
-**Bài đọc kiến thức:** folder [kien-thuc/](kien-thuc/README.md) chứa bài đọc tổng hợp cho từng chủ
-đề, viết lại từ các tài liệu gốc ở mục "Đọc", để bạn không phải mở từng link. Cách học một chủ đề:
-đọc plan (file ở đây) → đọc bài kiến thức cùng số → quay lại plan tick "Nắm chắc khi" và trả lời
-Phần 2.
+**Kiến thức:** folder [kien-thuc/](kien-thuc/README.md) chứa phần học. Chủ đề chính có
+**giáo trình đầy đủ từ cơ bản tới nâng cao** (chương sách, ví dụ chạy được, bài tập):
+[PHP và Laravel](kien-thuc/php/README.md) (30 chương); Database đang viết. Các chủ đề khác có bài
+đọc tổng hợp theo module. Cách học: đọc plan (file ở đây) để biết module cần gì → đọc chương giáo
+trình mà module trỏ tới → quay lại plan tick "Nắm chắc khi" và trả lời Phần 2.
 
 **Mindmap:** mở [mindmap.html](mindmap.html) bằng trình duyệt. Mindmap toả tròn, đi sâu từng
 tầng: tất cả → nhóm → file → module → nhóm kiến thức.

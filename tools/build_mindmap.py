@@ -85,13 +85,16 @@ def parse_file(path: Path) -> dict:
             level = next((e for e in "🟢🟡🔴" if stage and e in stage), "")
             module = {"label": plain(line[5:]), "kind": "module", "file": path.name,
                       "level": level, "stage": stage or "",
-                      "why": "", "checks": [], "children": []}
+                      "why": "", "checks": [], "chapters": [], "children": []}
             node["children"].append(module)
             section = None
             continue
         if module is None:
             continue
         s = line.strip()
+        if s.startswith("📖 **Giáo trình:**"):
+            module["chapters"] = [{"title": t, "href": h} for t, h in re.findall(r"\[([^\]]+)\]\(([^)]+)\)", s)]
+            continue
         if s.startswith("**Vì sao cần học:**"):
             section = "why"
             module["why"] = s[len("**Vì sao cần học:**"):].strip()
@@ -485,7 +488,8 @@ function showPanel(m) {
       ${m.checks.map((c, i) => `<label><input type="checkbox" data-i="${i}" ${saved[i] ? "checked" : ""}><span>${c}</span></label>`).join("")}` : ""}
     <h3>Học chi tiết</h3>
     <p><a href="${encodeURI(m.file)}" target="_blank" rel="noopener">Mở plan ${esc(m.file)}</a>, tìm module “${esc(m.label)}”.</p>
-    ${m.knowledge ? `<p><a href="${encodeURI(m.knowledge)}" target="_blank" rel="noopener">📖 Mở bài đọc kiến thức</a>, mục “${esc(m.label)}”.</p>` : ""}`;
+    ${m.chapters && m.chapters.length ? `<p>📖 Giáo trình:</p><ul>${m.chapters.map(c => `<li><a href="${encodeURI(c.href)}" target="_blank" rel="noopener">${esc(c.title)}</a></li>`).join("")}</ul>`
+      : m.knowledge ? `<p><a href="${encodeURI(m.knowledge)}" target="_blank" rel="noopener">📖 Mở bài đọc kiến thức</a>, mục “${esc(m.label)}”.</p>` : ""}`;
   panel.classList.add("open");
   panel.querySelector(".close").onclick = () => { panel.classList.remove("open"); render(); };
   panel.querySelectorAll("input[type=checkbox]").forEach(cb => cb.onchange = () => {
