@@ -4319,9 +4319,9 @@ CREATE TABLE video_comments (video_id BIGINT, comment_id BIGINT PRIMARY KEY,
   FOREIGN KEY (video_id) REFERENCES videos(id), FOREIGN KEY (comment_id) REFERENCES comments(id));
 ```
 
-- Cách 1 đơn giản, query nhanh; thêm loại cha mới là thêm cột. ⚠️ Theo tài liệu MySQL, cột nằm trong
-  `CHECK` không được dùng trong referential action của FK (`ON DELETE CASCADE`, `SET NULL`...), nên
-  cách này phải xoá comment ở tầng app hoặc để FK mặc định từ chối xoá cha còn comment.
+- Cách 1 đơn giản, query nhanh; thêm loại cha mới là thêm cột. ⚠️ Cột nằm trong `CHECK` không được
+  dùng trong FK có `ON UPDATE CASCADE`, `SET NULL` hay `SET DEFAULT` (MySQL 8.4); FK mặc định hoặc
+  `ON DELETE CASCADE` thì vẫn được.
 - Cách 2 linh hoạt, `comment_id PRIMARY KEY` đảm bảo một comment thuộc tối đa một cha mỗi loại (muốn
   chặn một comment vừa thuộc post vừa thuộc video thì cần thêm kiểm tra ở app).
 - Cách thứ ba Karwin nêu: tạo *bảng cha chung* (`commentables(id)`), `posts.id` và `videos.id` đều là

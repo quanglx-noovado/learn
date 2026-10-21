@@ -24,7 +24,7 @@ lượt review độc lập đối chiếu tài liệu gốc.
 | Giáo trình | File plan |
 |---|---|
 | [PHP và Laravel](php/README.md) (30 chương) | [05-php-laravel.md](../05-php-laravel.md) |
-| [Database quan hệ](database/README.md) (đang viết) | [03-database-sql.md](../03-database-sql.md) |
+| [Database quan hệ](database/README.md) (10 chương đầu: nền tảng và SQL; từ chương 11 chưa viết, dùng bài đọc 03 bên dưới) | [03-database-sql.md](../03-database-sql.md) |
 
 ## Bài đọc tổng hợp theo module
 
