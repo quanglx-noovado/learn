@@ -69,7 +69,9 @@ sai**, nên không ai biết để sửa.
 - `CROSS JOIN` ghép mọi dòng bảng này với mọi dòng bảng kia, tức m × n dòng.
 - *Self join* là join một bảng với chính nó.
   - Ví dụ: nhân viên và quản lý cùng nằm trong bảng `employees`, nối qua cột `manager_id`.
-- MySQL không có `FULL OUTER JOIN`. Muốn có thì giả lập bằng `LEFT JOIN ... UNION ... RIGHT JOIN`.
+- MySQL không có `FULL OUTER JOIN`. Muốn có thì giả lập bằng `LEFT JOIN ... UNION ... RIGHT JOIN`;
+  nhớ SELECT khoá của cả hai bảng, nếu không `UNION` (khử trùng) có thể gộp mất các dòng giống nhau.
+  An toàn hơn: `LEFT JOIN ... UNION ALL` nửa sau là anti-join (`RIGHT JOIN ... WHERE a.id IS NULL`).
 - *Anti-join* nghĩa là "lấy những dòng A không có B tương ứng". Có hai cách viết:
   - `LEFT JOIN b ON ... WHERE b.id IS NULL`
   - `WHERE NOT EXISTS (SELECT 1 FROM b WHERE ...)`
@@ -953,7 +955,8 @@ Các lựa chọn ở đây rất khó đổi lại về sau.
 *Audit và history*
 - Ghi lại ai đổi gì, lúc nào, bằng một trong ba cách:
   - Từ app: biết được user nào và lý do.
-  - Bằng trigger: không bao giờ sót, nhưng không biết user nào.
+  - Bằng trigger: khó sót các lệnh ghi qua SQL, nhưng không biết user nào, và vẫn sót thay đổi do FK
+    cascade, `TRUNCATE`, `DROP PARTITION` (những thao tác này không kích hoạt trigger).
   - Bằng CDC (Debezium đọc binlog): không sót và không đụng vào code app.
 - Dữ liệu cần tra "tại thời điểm X", như giá hay hợp đồng, thì lưu kèm `valid_from`/`valid_to`.
 - ⚠️ Bảng audit lớn rất nhanh. Nên partition theo thời gian ngay từ đầu.
@@ -1020,8 +1023,9 @@ transaction mở lâu làm cả DB chậm". Muốn trả lời phải hiểu bê
 *Đánh đổi giữa độ bền và throughput*
 - `innodb_flush_log_at_trx_commit = 1` (fsync redo mỗi lần commit) cùng với `sync_binlog = 1`
   (fsync binlog mỗi lần commit) là an toàn nhất.
-- Hạ các giá trị này xuống để tăng throughput nghĩa là chấp nhận mất khoảng 1 giây giao dịch cuối
-  cùng khi máy sập.
+- Hạ các giá trị này xuống để tăng throughput nghĩa là chấp nhận mất các giao dịch cuối cùng khi máy
+  sập: với `innodb_flush_log_at_trx_commit` = 0 hoặc 2 là khoảng 1 giây gần nhất; với `sync_binlog`
+  = 0 hoặc N thì lượng mất không giới hạn ở 1 giây, và redo log với binlog có thể lệch nhau.
 
 *Doublewrite buffer*
 - Page của InnoDB là 16 KB, nhưng đĩa chỉ đảm bảo ghi nguyên vẹn các đơn vị nhỏ hơn (thường 4 KB).
@@ -1262,7 +1266,7 @@ là nguồn sự cố, vừa là chủ đề câu hỏi quen thuộc.
 
 *Failover*
 - Khi primary chết: chọn replica mới nhất làm primary, rồi trỏ app sang đó (qua DNS, proxy hoặc VIP).
-  Tool thường dùng: Orchestrator, MySQL InnoDB Cluster/Router, hoặc dịch vụ managed như RDS, Cloud SQL.
+  Tool thường dùng: Orchestrator (repo gốc đã archive, Percona duy trì bản fork), MySQL InnoDB Cluster/Router, hoặc dịch vụ managed như RDS, Cloud SQL.
 - ⚠️ Failover ở chế độ async có thể mất vài giao dịch cuối.
 - ⚠️ *Split brain*: primary cũ sống lại và vẫn nhận ghi, nên có hai primary cùng lúc. Cần *fencing*,
   tức chắc chắn chặn hẳn primary cũ ([14-distributed-systems.md](14-distributed-systems.md)).
@@ -1406,7 +1410,7 @@ thói quen.
 | DDL trong transaction | Không, DDL tự commit | Có, migration rollback được |
 | Kiểu dữ liệu | Cơ bản, có `JSON` | `jsonb`, mảng, range, `inet`, `uuid`, kiểu tự định nghĩa |
 | Mở rộng | Plugin hạn chế | Extension: PostGIS, pg_trgm, pgvector, TimescaleDB, Citus |
-| Hệ sinh thái scale | Vitess, ProxySQL, gh-ost, Orchestrator | Citus, Patroni, PgBouncer |
+| Hệ sinh thái scale | Vitess, ProxySQL, gh-ost, Orchestrator (đã archive, có fork Percona) | Citus, Patroni, PgBouncer |
 
 *Hệ quả thực tế*
 - **Hệ quả khi vận hành**:

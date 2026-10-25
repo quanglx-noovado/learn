@@ -184,7 +184,7 @@ xem [Chương 30](30-laravel-testing-octane-deploy.md).
 ### 1.4 Read/write connection và `sticky`
 
 Hệ thống lớn thường có một máy *primary* nhận ghi và vài máy *replica* sao chép từ primary để chia tải
-đọc ([Database chương 22](../database/22-replication-ha.md)). Laravel cho khai hai nhóm host trong cùng
+đọc (Database [chương 22](../database/22-replication-ha.md)). Laravel cho khai hai nhóm host trong cùng
 một connection:
 
 ```php
@@ -1039,7 +1039,7 @@ mặc định thay vì báo lỗi).
 
 ⚠️ `increment('views')` sinh `update ... set views = views + 1`, cộng ngay trong MySQL nên an toàn khi
 nhiều request cùng tăng. Viết `$post->views + 1` trong PHP rồi `update` là *lost update*: hai request
-cùng đọc 10, cùng ghi 11 ([Database chương 14](../database/14-isolation-mvcc.md)).
+cùng đọc 10, cùng ghi 11 (Database [chương 14](../database/14-isolation-mvcc.md)).
 
 ⚠️ `update()` và `delete()` không có `where` áp lên **toàn bộ bảng**. Builder không cảnh báo gì.
 
@@ -1060,7 +1060,7 @@ DB::transaction(function () {
 `lockForUpdate()` thêm `for update`, `sharedLock()` thêm `lock in share mode` (grammar MySQL 13.x vẫn
 sinh cú pháp cũ này; MySQL 8 hiểu nó như `FOR SHARE`). Khoá chỉ giữ tới hết transaction, nên ngoài transaction (autocommit) chúng gần như
 vô nghĩa. Như mục 1.4, gọi lock cũng ép query chạy trên connection write. Khoá dòng, thứ tự khoá để
-tránh deadlock: [Database chương 15](../database/15-lock-deadlock.md); transaction trong Laravel: mục 11.
+tránh deadlock: Database [chương 15](../database/15-lock-deadlock.md); transaction trong Laravel: mục 11.
 
 ### 4.8 Xem SQL mà builder sinh ra
 
@@ -2346,7 +2346,7 @@ tác DB bên trong.
 ⚠️ Như mục 1.5 và 2.9: câu DDL trong transaction trên MySQL gây implicit commit.
 
 Deadlock là gì, vì sao xảy ra, cách giảm (khoá theo cùng thứ tự, transaction ngắn, index đúng):
-[Database chương 15](../database/15-lock-deadlock.md). Isolation level mặc định của InnoDB
+Database [chương 15](../database/15-lock-deadlock.md). Isolation level mặc định của InnoDB
 (`REPEATABLE READ`) và các hiện tượng như lost update: [chương 14](../database/14-isolation-mvcc.md).
 
 ### 11.3 Bug kinh điển: dispatch job bên trong transaction
@@ -2387,7 +2387,7 @@ $post->refreshForUpdate();    // đọc lại model với FOR UPDATE (trong tran
 ```
 
 Pessimistic lock (khoá trước) và optimistic lock (cột `version`, `UPDATE ... WHERE version = ?` rồi kiểm
-tra số dòng bị ảnh hưởng): so sánh và khi nào dùng cái nào ở [Database chương 15](../database/15-lock-deadlock.md).
+tra số dòng bị ảnh hưởng): so sánh và khi nào dùng cái nào ở Database [chương 15](../database/15-lock-deadlock.md).
 
 ## 12. Upsert, thao tác hàng loạt và raw query
 

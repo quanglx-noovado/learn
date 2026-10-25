@@ -1297,7 +1297,7 @@ MySQL manual nói rõ: deadlock là chuyện **bình thường** trên server b�
 lại toàn bộ transaction**. Một lỗi gần giống là *lock wait timeout* (1205, SQLSTATE `HY000`, "Lock wait
 timeout exceeded; try restarting transaction"): mặc định InnoDB chỉ rollback câu lệnh đang chờ, không
 rollback cả transaction (trừ khi server bật `innodb_rollback_on_timeout`). Cách deadlock xảy ra và cách
-giảm nó: [giáo trình Database, chương 15](../database/15-lock-deadlock.md).
+giảm nó: giáo trình Database, [chương 15](../database/15-lock-deadlock.md).
 
 Một hàm bọc transaction có chạy lại, cùng ý tưởng với `DB::transaction($callback, $attempts)` của
 Laravel:

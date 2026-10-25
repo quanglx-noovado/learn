@@ -25,7 +25,8 @@ Cuối mỗi file có **bài tập tự làm**. Nộp bài để được review
 
 **Kiến thức:** folder [kien-thuc/](kien-thuc/README.md) chứa phần học. Chủ đề chính có
 **giáo trình đầy đủ từ cơ bản tới nâng cao** (chương sách, ví dụ chạy được, bài tập):
-[PHP và Laravel](kien-thuc/php/README.md) (30 chương); Database đang viết. Các chủ đề khác có bài
+[PHP và Laravel](kien-thuc/php/README.md) (30 chương) và
+[Database quan hệ](kien-thuc/database/README.md) (25 chương). Các chủ đề khác có bài
 đọc tổng hợp theo module. Cách học: đọc plan (file ở đây) để biết module cần gì → đọc chương giáo
 trình mà module trỏ tới → quay lại plan tick "Nắm chắc khi" và trả lời Phần 2.
 
